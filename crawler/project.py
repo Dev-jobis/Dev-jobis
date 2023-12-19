@@ -20,6 +20,8 @@ import sys
 from openpyxl import Workbook
 from selenium.common.exceptions import StaleElementReferenceException   
 from webdriver_manager.chrome import ChromeDriverManager
+
+
 # 크롬 옵션 설정
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -29,7 +31,7 @@ pyautogui.FAILSAFE = False
 chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 service = Service(executable_path=ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
-driver.maximize_window()
+# driver.maximize_window()
 #크롤링방지옵션 해제
 driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
     "source": """
@@ -58,14 +60,14 @@ while True:
         except StaleElementReferenceException:
             continue
 #테스트용으로 10개 처리로 설정(나중에 늘림)
-        if link_num > 10:
+        if link_num > 20:
             break
 
         link = job_card.find_element(By.CSS_SELECTOR, "div > a").get_attribute('href')
         co_name = job_card.find_element(By.CSS_SELECTOR, "div > a > div > div.job-card-company-name").text
         print(f"{link_num} : {co_name}")
 
-        pyautogui.hotkey("command", "t")
+        pyautogui.hotkey("command", "")
         time.sleep(2)
         all_windows = driver.window_handles
 
@@ -76,23 +78,20 @@ while True:
         driver.get(link)
         time.sleep(2)
 
-        response = requests.get(link)
-#크롤링해올 부분
-        soup = bs(response.text, 'html.parser')
+        page_source = driver.page_source
+        soup = bs(page_source, 'html.parser')
         details = soup.select("#__next > div.JobDetail_cn__WezJh > \
-            div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > \
-            div.JobContent_className___ca57 > div.JobContent_descriptionWrapper__SM4UD > \
-            section.JobDescription_JobDescription__VWfcb")
-#엑셀 파일에 저장
-        for i in details:
-            detail = i.get_text()
-            print(detail)
-            write_ws.append([detail])
+                                div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > \
+                                div.JobContent_className___ca57 > div.JobContent_descriptionWrapper__SM4UD > \
+                                section.JobDescription_JobDescription__VWfcb")
+        txt_file_path = f"{co_name}.txt"
+        with open(txt_file_path, 'w', encoding='utf-8') as txt_file:
+            for detail in details:
+                txt_file.write(detail.get_text() + '\n')
+        print(f"크롤링 완료 : {txt_file_path}")
 
-        write_wb.save("Wanted.xlsx")
 #웹페이지 닫기
         driver.close()
         all_windows = driver.window_handles
         driver.switch_to.window(all_windows[-1])
-        
 
