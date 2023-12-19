@@ -22,7 +22,7 @@ zookeeper 설치
 
 
 # zookeeper id 각 노드에 입력
-## 첫번재 서버에서 
+## 첫번째 서버에서 
 	mkdir -p /usr/local/zookeeper/data
 	sudo chown -R ec2-user: /usr/local/zookeeper/
 	echo 1 > /usr/local/zookeeper/data/myid
