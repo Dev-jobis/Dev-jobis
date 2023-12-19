@@ -21,7 +21,6 @@ from openpyxl import Workbook
 from selenium.common.exceptions import StaleElementReferenceException   
 from webdriver_manager.chrome import ChromeDriverManager
 
-
 # 크롬 옵션 설정
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
@@ -41,17 +40,17 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
             """
 })
 #크롤링페이지
-wait = webdriver.support.ui.WebDriverWait(driver, 2)
+wait = webdriver.support.ui.WebDriverWait(driver, 1)
 url = "https://www.wanted.co.kr/wdlist/518?country=kr&job_sort=job.latest_order&years=0&years=2&locations=all" #3
 driver.get(url=url)
-time.sleep(2)
+time.sleep(1)
 
 write_wb = Workbook()
 write_ws = write_wb.active
 
 while True:
     ids = driver.find_elements(by=By.CSS_SELECTOR, value=".Card_className__u5rsb")
-    time.sleep(2)
+    time.sleep(1)
 
     for link_num, job_card in enumerate(ids, start=1):
         try:
@@ -59,7 +58,7 @@ while True:
             co_name = job_card.find_element(By.CSS_SELECTOR, "div > a > div > div.job-card-company-name").text
         except StaleElementReferenceException:
             continue
-#테스트용으로 10개 처리로 설정(나중에 늘림)
+#테스트용으로 20개 처리로 설정(나중에 늘림)
         if link_num > 20:
             break
 
