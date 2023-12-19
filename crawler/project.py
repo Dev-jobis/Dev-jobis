@@ -24,14 +24,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 # 크롬 옵션 설정
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-#pyautogui : 키보드 자동화
+
+# pyautogui : 키보드 자동화
 pyautogui.FAILSAFE = False
 
 chrome_options.add_experimental_option("excludeSwitches", ["enable-logging"])
 service = Service(executable_path=ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 # driver.maximize_window()
-#크롤링방지옵션 해제
+# 크롤링방지옵션 해제
 driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
     "source": """
             Object.defineProperty(navigator, 'webdriver', {
@@ -39,7 +40,7 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
             })
             """
 })
-#크롤링페이지
+# 크롤링페이지
 wait = webdriver.support.ui.WebDriverWait(driver, 1)
 url = "https://www.wanted.co.kr/wdlist/518?country=kr&job_sort=job.latest_order&years=0&years=2&locations=all" #3
 driver.get(url=url)
@@ -58,7 +59,8 @@ while True:
             co_name = job_card.find_element(By.CSS_SELECTOR, "div > a > div > div.job-card-company-name").text
         except StaleElementReferenceException:
             continue
-#테스트용으로 20개 처리로 설정(나중에 늘림)
+        
+        # 테스트용으로 20개 처리로 설정(나중에 늘림)
         if link_num > 20:
             break
 
@@ -73,7 +75,8 @@ while True:
         driver.execute_script("window.open('');")
         all_windows = driver.window_handles
         driver.switch_to.window(all_windows[1])
-#공고 페이지 열기
+        
+        # 공고 페이지 열기
         driver.get(link)
         time.sleep(2)
 
@@ -89,7 +92,7 @@ while True:
                 txt_file.write(detail.get_text() + '\n')
         print(f"크롤링 완료 : {txt_file_path}")
 
-#웹페이지 닫기
+        # 웹페이지 닫기
         driver.close()
         all_windows = driver.window_handles
         driver.switch_to.window(all_windows[-1])
