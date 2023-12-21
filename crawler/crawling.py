@@ -11,10 +11,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
 import re
-import logging
-from datetime import datetime
-import logging.config
-from kafka import KafkaProducer
+
 
 # 크롬 옵션 설정 - detach:크롬이 닫혀도 웹 브라우저 유지 기능
 chrome_options = Options()
@@ -36,10 +33,7 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
             })
             """
 })
-producer = KafkaProducer(
-    bootstrap_servers=["43.200.4.150:9092","15.164.229.162:9092","3.39.25.90:9092"],
-    value_serializer=lambda v: json.dumps(v).encode('utf-8')
-)
+
 URL_LIST = []
 
 def MAKE_URL():
@@ -161,8 +155,6 @@ while completed_count < max_completed_count:
         completed_count += 1
         time.sleep(1)         
 
-topic_name = 'your_topic'
-message = 'Hello, Kafka!'
 
 producer.send(topic_name, value=message)
 
