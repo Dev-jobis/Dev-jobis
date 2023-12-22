@@ -14,7 +14,6 @@ from kafka import KafkaProducer
 import re
 import json
 
-
 chrome_options = Options()
 chrome_options.add_argument('--headless')
    
@@ -38,7 +37,7 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
 URL_LIST = []
 
 def MAKE_URL():
-    for i in range(194000, 195100, 1): 
+    for i in range(195000, 195100, 1): 
         URL = "https://www.wanted.co.kr/wd/" + str(i)
         URL_LIST.append(URL)
 
@@ -53,7 +52,6 @@ while completed_count < max_completed_count:
         response = requests.get(URL)
         if response.status_code == 200:
             
-            
             driver.get(URL)
             try:
                 WebDriverWait(driver, 20).until(lambda driver: driver.execute_script("return document.readyState") == "complete")
@@ -64,10 +62,6 @@ while completed_count < max_completed_count:
             soup = bs(page_source, 'html.parser')
             title = soup.title.text
            
-            # details = soup.select("#__next > div.JobDetail_cn__WezJh > \
-            #                         div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > \
-            #                         div.JobContent_className___ca57 > div.JobContent_descriptionWrapper__SM4UD > \
-            #                         section.JobDescription_JobDescription__VWfcb")
             companydescription = str(soup.select("#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > \
                 div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > div.JobContent_descriptionWrapper__SM4UD > \
                 section.JobDescription_JobDescription__VWfcb > p:nth-child(1) > span"))
@@ -124,9 +118,6 @@ while completed_count < max_completed_count:
             jikmoo_list = [item.lstrip().replace('"', '') 
                 for item in jikmoo_list]
            
-            #data = {'detail': combined_text}
-            #producer = KafkaProducer(acks=0, bootstrap_servers=["43.200.4.150:9092","15.164.229.162:9092","3.39.25.90:9092"], value_serializer=lambda x: json.dumps(x, default=str, ensure_ascii=False).encode('utf-8'))
-            #producer.send('job-data', value=data)
             time.sleep(0.1)
             job_titles = [
                     "Data Engineer",
@@ -138,6 +129,8 @@ while completed_count < max_completed_count:
                     "Front-end Engineer",
                     "Security Engineer",
                     "Hardware Engineer",
+                    "DevOps"
+                    "System Admin"
                     "DevOps / System Admin",
                     "Test Engineer",
                     "QA, Test Engineer",
@@ -179,6 +172,7 @@ while completed_count < max_completed_count:
                 cleaned_title = re.sub(r'\| 원티드', '', cleaned_title)
                 txt_file_path = f"{cleaned_title}.txt"
                 print(f"채용 공고 : {cleaned_title}")
+
                 # 채용공고 잘 가져오는 지 확인
                 with open(txt_file_path, 'w', encoding='utf-8') as txt_file:
                     combined_text = f"{title}\n\n직무: {jikmoo_list}\n\n"\
@@ -195,18 +189,21 @@ while completed_count < max_completed_count:
                                     f"{technologystack2}\n"\
                                     f"{URL.split('/')[-1]}"
                     combined_text_cleaned = combined_text.replace('<div class="SkillItem_SkillItem__E2WtM">', ', ')
-                    combined_text_cleaned = re.sub(r'<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,', '', combined_text_cleaned)
-                    combined_text_cleaned = re.sub(r'<span.*?>|<\/span>', '', combined_text_cleaned)
+                    combined_text_cleaned = re.sub(r'<span.*?>|amp;|<\/span>|<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,', '', combined_text_cleaned)
                     combined_text_cleaned = re.sub(r'<br/>', '\n', combined_text_cleaned)
-                    combined_text_cleaned = re.sub(r'amp;', '', combined_text_cleaned)
                     txt_file.write(combined_text_cleaned + '\n')
+                    # print(combined_text_cleaned)
+                    # data = {'detail': combined_text_cleaned}
+                    # data = {'detail': combined_text_cleaned.replace('\n', ' ')}
+                    data = {combined_text_cleaned.replace('\n', ' ')}
+                    serialized_data = json.dumps(data, default=str, ensure_ascii=False).encode('utf-8')
 
-
-                
-                #         data = {'detail': combined_text}
-                #         producer = KafkaProducer(acks=0, bootstrap_servers=["43.200.4.150:9092","15.164.229.162:9092","3.39.25.90:9092"], 
-                #                                  value_serializer=lambda x: json.dumps(x, default=str, ensure_ascii=False).encode('utf-8'))
-                #         producer.send('job-data', value=data)
+                    producer = KafkaProducer(
+                            acks=0,
+                            bootstrap_servers=["13.125.213.220:9092", "54.180.81.131:9092", "54.180.91.234:9092"],
+                            value_serializer=lambda x: x,)
+                    producer.send('job-data', value=serialized_data)
+                    time.sleep(0.05)
         completed_count += 1
         time.sleep(1)         
 driver.close()
