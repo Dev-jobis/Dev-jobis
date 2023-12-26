@@ -5,8 +5,11 @@ import boto3
 import pinecone
 import openai
 import tiktoken
+from uuid import uuid4
 from tqdm.auto import tqdm
 from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.document_loaders.s3_file import S3FileLoader
+from langchain_community.document_loaders.s3_directory import S3DirectoryLoader
 from langchain.schema import Document
 
 
@@ -28,32 +31,20 @@ PINECONE_API_KEY = get_s3_object(
 PINECONE_ENV = "gcp-starter"
 
 
-file_directory = "crawled_data"
-docs = []
+# S3FileLoader, S3DirectoryLoader
+datetiime_utc = "2023122607"  # example
+loader = S3DirectoryLoader(
+    bucket="project-bucket-sessac",
+    prefix=f"logs/{datetiime_utc}",
+    region_name="ap-northeast-2",
+)
+docs = loader.load()
+datas = []
+for doc in docs:
+    datas.append({"source": doc.metadata["source"], "text": doc.page_content})
 
-for txtfile in os.listdir(file_directory):
-    with open(f"{file_directory}/{txtfile}", "r") as f:
-        post_id = txtfile.split("_")[-1].split(".")[0]
-        data = f.read()
-        data = data.split("\n")
-        post_title = data[0].split("|")[0]
-        company_name = data[1]
-        job_type = data[2].split(":")[1]
-        company_address = data[3].split(":")[-1]
-        page_content = str(data[4:])
-
-    docs.append(
-        Document(
-            page_content=page_content,
-            metadata={
-                "post_id": post_id,
-                "post_title": post_title,
-                "company_name": company_name,
-                "job_type": job_type,
-                "company_address": company_address,
-            },
-        )
-    )
+print(datas[0])
+print(len(datas))
 
 # 아래 둘 중 하나 고르면 됨
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # 모델에 맞는 인코딩 고르기
@@ -80,17 +71,7 @@ for idx, doc in enumerate(docs):
     )  # document 하나를 쪼개서 전체 리스트인 chunk에 넣는다.
     for i in range(len(texts)):
         chunks.extend(
-            [
-                {
-                    "id": f"{doc.metadata['post_id']}_{i}",
-                    "text": texts[i],
-                    "chunk": i,
-                    "post_title": doc.metadata["post_title"],
-                    "company_name": doc.metadata["company_name"],
-                    "job_type": doc.metadata["job_type"],
-                    "company_address": doc.metadata["company_address"],
-                }
-            ]
+            [{"id": str(uuid4()), "text": texts[i], "source": doc.metadata["source"]}]
         )
 
 
@@ -140,17 +121,7 @@ for i in tqdm(range(0, len(chunks), batch_size)):
                 pass
     embeds = [record.embedding for record in res.data]
     # cleanup metadata
-    meta_batch = [
-        {
-            "text": x["text"],
-            "chunk": x["chunk"],
-            "post_title": x["post_title"],
-            "company_name": x["company_name"],
-            "job_type": x["job_type"],
-            "company_address": x["company_address"],
-        }
-        for x in meta_batch
-    ]
+    meta_batch = [{"text": x["text"], "source": x["source"]} for x in meta_batch]
     to_upsert = list(zip(ids_batch, embeds, meta_batch))
     # upsert to Pinecone
     index.upsert(vectors=to_upsert)
