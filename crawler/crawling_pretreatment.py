@@ -55,7 +55,7 @@ class KafkaHandler(logging.Handler):
         
 producer = KafkaProducer(
     acks=0,
-    bootstrap_servers=["54.180.149.231:9092", "54.180.96.141:9092", "54.180.81.8:9092"],
+    bootstrap_servers=["170.0.0.139:9092", "170.0.0.155:9092", "170.0.0.170:9092"],
     value_serializer=lambda x: x,
     metadata_max_age_ms=60000,
     request_timeout_ms=30000
