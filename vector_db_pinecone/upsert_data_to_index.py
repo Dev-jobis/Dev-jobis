@@ -41,7 +41,6 @@ for txtfile in os.listdir(file_directory):
         job_type = data[2].split(":")[1]
         company_address = data[3].split(":")[-1]
         page_content = str(data[4:])
-        # print(page_content)
 
     docs.append(
         Document(
@@ -55,12 +54,10 @@ for txtfile in os.listdir(file_directory):
             },
         )
     )
-# print(docs[0])
 
 # 아래 둘 중 하나 고르면 됨
 tokenizer = tiktoken.encoding_for_model("gpt-3.5-turbo")  # 모델에 맞는 인코딩 고르기
 # tokenizer = tiktoken.get_encoding('cl100k_base')
-# print(tokenizer)
 
 
 # create the length function
