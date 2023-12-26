@@ -3,4 +3,5 @@ requests
 beautifulsoup4
 selenium
 webdriver-manager
-json
+kafka-handler
+chromedriver-autoinstaller
