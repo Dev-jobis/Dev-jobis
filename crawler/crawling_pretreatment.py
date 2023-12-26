@@ -53,14 +53,15 @@ class KafkaHandler(logging.Handler):
             time.sleep(0.05)
 
         
+kafka_broker_addresses = os.getenv('KAFKA_BROKER_ADDRESSES', '170.0.0.139:9092,170.0.0.155:9092,170.0.0.170:9092').split(',')
+
 producer = KafkaProducer(
     acks=0,
-    bootstrap_servers=["170.0.0.139:9092", "170.0.0.155:9092", "170.0.0.170:9092"],
+    bootstrap_servers=kafka_broker_addresses,
     value_serializer=lambda x: x,
     metadata_max_age_ms=60000,
     request_timeout_ms=30000
 )
-
 kafka_handler = KafkaHandler()
 kafka_handler.setLevel(logging.INFO)
 kafka_handler.setFormatter(formatter)
