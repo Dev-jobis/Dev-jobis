@@ -15,6 +15,7 @@ import re
 import json
 import logging
 from datetime import datetime
+import variables
 
 
 class JsonFormatter(logging.Formatter):
@@ -236,53 +237,6 @@ while completed_count < max_completed_count:
 
             time.sleep(1)
 
-            job_titles = [
-                "Data Engineer",
-                "Embedded Developer",
-                "Java Developer",
-                ".NET Developer",
-                "Network Administrator",
-                "System, Network Administrator",
-                "Front-end Engineer",
-                "Security Engineer",
-                "Hardware Engineer",
-                "DevOps",
-                "System Admin",
-                "DevOps / System Admin",
-                "Test Engineer",
-                "QA, Test Engineer",
-                "Android Developer",
-                "iOS Developer",
-                "Chief Information Officer",
-                "CIO, Chief Information Officer",
-                "Chief Technology Officer",
-                "CTO, Chief Technology Officer",
-                "Back-end Engineer",
-                "Web Developer",
-                "Product Manager",
-                "Development Manager",
-                "PHP Developer",
-                "Ruby on Rails Developer",
-                "Node.js Developer",
-                "Voice Engineer",
-                "Video, Voice Engineer",
-                "Graphics Engineer",
-                "Python Developer",
-                "C++ Developer",
-                "C, C++ Developer",
-                "Web Publisher",
-                "BI Engineer",
-                "Data Scientist",
-                "Big Data Engineer",
-                "Technical Support",
-                "Blockchain Platform Engineer",
-                "Machine Learning Engineer",
-                "Software Engineer",
-                "Cross-platform App Developer",
-                "VR Engineer",
-                "ERP Consultant",
-                "Database Administrator",
-            ]
 
             if any(job in job_titles for job in jikmoo_list):
                 cleaned_title = re.sub(
