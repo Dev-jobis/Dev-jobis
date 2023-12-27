@@ -208,7 +208,7 @@ while completed_count < max_completed_count:
                                                   '', combined_text)
                     combined_text_cleaned = re.sub(r'<br/>', '\n', combined_text_cleaned)
                     txt_file.write(combined_text_cleaned + '\n')
-                    data = {'message': combined_text_cleaned.replace('\n', ' ')}
+                    data = {combined_text_cleaned.replace('\n', ' ')}
                     serialized_data = json.dumps(data, default=str, ensure_ascii=False).encode('utf-8')
 
                     producer.send('job-data', value=serialized_data)
