@@ -41,17 +41,15 @@ def lambda_handler(event, context):
     """
     chatbot = WantedChatBot(index_name, questioner_message, primer, 3)
     response = chatbot.answer
-    blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": f"<@{questioner_user_id}>\n{response}",
-            },
-        }
-    ]
-    slack_client.chat_postMessage(channel=questioner_channel, text="", blocks=blocks)
-
+    ans = ""
+    i = 0
+    for res in response:
+        ans += res
+        i += 1
+        if (i > 20) and ans[-1] in [".", "\n"]:
+            slack_client.chat_postMessage(channel=questioner_channel, text=ans)
+            i = 0
+            ans = ""
     # TODO: 메시지 보낸 시간을 사용자 쿼리 받은 시간과 비교(챗봇 응답 시간 단축)
 
     return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}
