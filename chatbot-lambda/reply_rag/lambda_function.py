@@ -37,6 +37,7 @@ def lambda_handler(event, context):
     they are finding.
     If the information can not be found in the information
     provided by the user you truthfully say "I don't know".
+    Your answer should be in Korean.
     """
     chatbot = WantedChatBot(index_name, questioner_message, primer, 3)
     response = chatbot.answer
