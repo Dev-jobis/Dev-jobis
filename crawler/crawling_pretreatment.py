@@ -16,8 +16,6 @@ import json
 import logging
 from datetime import datetime
 
-def get_utc_now():
-    return datetime.utcnow()
 
 class JsonFormatter(logging.Formatter):
     def __init__(self):
@@ -25,7 +23,7 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record):
         # timestamp = datetime.utcfromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
+        datetime.utcnow()
         log_data = {
             'timestamp': get_utc_now().strftime('%Y-%m-%d %H:%M:%S.%f'),
             'level': record.levelname,
@@ -84,27 +82,27 @@ driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
 })
 
 def log_crawling_start():
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.info('crawling start.', extra=extra_data)
 
 def log_crawling_success(url):
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.info(f'success - URL: {url}', extra=extra_data)
 
 def log_http_error(url, http_err):
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.error(f'Not found. {http_err}', extra=extra_data)
 
 def log_request_error(url, req_err):
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.error(f'fail requests: {req_err}', extra=extra_data)
 
 def log_crawling_error(error):
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.error(f'fail crawling: {error}', extra=extra_data)
 
 def log_non_dev_related(url):
-    extra_data = {'timestamp': get_utc_now()}
+    extra_data = {'timestamp': datetime.utcnow()}
     logger.info(f'this url({url})is not for developer', extra=extra_data)
 
 def make_url_list(start, end, step):
