@@ -1,0 +1,7 @@
+kafka-python
+requests
+beautifulsoup4
+selenium
+webdriver-manager
+kafka-handler
+chromedriver-autoinstaller
