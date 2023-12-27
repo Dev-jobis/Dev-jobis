@@ -105,169 +105,153 @@ def make_url_list(start, end, step):
 
 URL_LIST = make_url_list(185000, 186000, 1)
 
-### 루프 코딩을 어떻게 할 것인가
-# def MAKE_URL(start, finish, step):
-#     URL_LIST = []
 
-#     # 주어진 finish 횟수만큼 반복
-#     for _ in range(finish):
-#         end = start + step
+## 루프 코딩을 어떻게 할 것인가
+def make_url_list(start, finish):
+    url_list = []
 
-#         # start부터 end까지의 숫자를 이용하여 URL을 생성하고 리스트에 추가
-#         for i in range(start, end):
-#             url = "https://www.wanted.co.kr/wd/" + str(i)
-#             URL_LIST.append(url)
+    # start부터 end까지의 숫자를 이용하여 URL을 생성하고 리스트에 추가
+    for i in range(start, finish):
+        url = f"https://www.wanted.co.kr/wd/{i}"
+        url_list.append(url)
 
-#         # 다음 반복을 위해 start 값을 end로 업데이트
-#         start = end
-
-#     return URL_LIST
-
-# # MAKE_URL 함수를 사용하여 URL 리스트 생성
-# URL_LIST = MAKE_URL(1, 100, 1)
-
-# # 다음 루프를 위해 start 값을 설정
-# next_start = URL_LIST[-1].split("/")[-1]
-# next_start = int(next_start) + 1
-
-# # 다음 루프를 위한 URL 리스트 생성
-# NEXT_LOOP = MAKE_URL(next_start, 100, 1)
+    return url_list
 
 
-completed_count = 0
-max_completed_count = len(URL_LIST)
+# MAKE_URL 함수를 사용하여 URL 리스트 생성
+URL_LIST = make_url_list(1, 100, 1)
 
-while completed_count < max_completed_count:
-    for i, URL in enumerate(URL_LIST):
-        try:
-            response = requests.get(URL)
-            response.raise_for_status()
 
-            driver.get(URL)
-            WebDriverWait(driver, 20).until(
-                lambda driver: driver.execute_script("return document.readyState")
-                == "complete"
-            )
+for i, url in enumerate(URL_LIST):
+    try:
+        # 1. 접근 가능한 페이지인지 확인
+        response = requests.get(url)
+        response.raise_for_status()  # TODO: 어떤 경우 있는지 확인
 
-            log_crawling_start()
+        driver.get(url)
+        WebDriverWait(driver, 20).until(
+            lambda driver: driver.execute_script("return document.readyState")
+            == "complete"
+        )
 
-            page_source = driver.page_source
-            soup = bs(page_source, "html.parser")
+        crawling_logging.log_crawling_start()
 
-            companyname = soup.select(
-                "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
-                "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
-                "section.JobHeader_className__HttDA > div:nth-child(2) > "
-                "span.JobHeader_companyNameText__uuJyu > a"
-            )
+        # 2. 개발 공고인지 확인
 
-            if companyname:
-                data_company_name = companyname[0]["data-company-name"]
+        # 3. 개발 공고면 크롤링 해서 저장
+        page_source = driver.page_source
+        soup = bs(page_source, "html.parser")
 
-            title = soup.title.text
-            base_selector = (
-                "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
-                "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
-                "div.JobContent_descriptionWrapper__SM4UD > "
-                "section.JobDescription_JobDescription__VWfcb > p:nth-child({}) > {}"
-            )
-            workplace = soup.select_one(
-                "#__next > div.JobDetail_cn__WezJh > "
-                "div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > "
-                "div.JobContent_className___ca57 > section.JobHeader_className__HttDA > "
-                "div:nth-child(2) > span.JobHeader_pcLocationContainer__xRwIv"
-            )
+        companyname = soup.select(
+            "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
+            "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
+            "section.JobHeader_className__HttDA > div:nth-child(2) > "
+            "span.JobHeader_companyNameText__uuJyu > a"
+        )
 
-            companydescription = str(soup.select(base_selector.format(1, "span")))
-            mainbusiness = str(soup.select(base_selector.format(3, "span")))
-            qualifications = str(soup.select(base_selector.format(5, "span")))
-            preferential = str(soup.select(base_selector.format(7, "span")))
-            welfare = str(soup.select(base_selector.format(9, "span")))
-            technologystack = str(soup.select(base_selector.format(11, "div")))
+        if companyname:
+            data_company_name = companyname[0]["data-company-name"]
 
-            soup = str(soup)
-            if '"occupationalCategory":' in soup:
-                if '"validThrough":' in soup:
-                    jikmoo = soup[
-                        soup.find('"occupationalCategory":')
-                        + 24 : soup.find('"validThrough":')
-                        - 2
-                    ]
-                else:
-                    jikmoo = soup[
-                        soup.find('"occupationalCategory":')
-                        + 24 : soup.find('"employmentType"')
-                        - 2
-                    ]
-            elif '"sub_categories":' in soup:
+        title = soup.title.text
+        base_selector = (
+            "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
+            "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
+            "div.JobContent_descriptionWrapper__SM4UD > "
+            "section.JobDescription_JobDescription__VWfcb > p:nth-child({}) > {}"
+        )
+        workplace = soup.select_one(
+            "#__next > div.JobDetail_cn__WezJh > "
+            "div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > "
+            "div.JobContent_className___ca57 > section.JobHeader_className__HttDA > "
+            "div:nth-child(2) > span.JobHeader_pcLocationContainer__xRwIv"
+        )
+
+        companydescription = str(soup.select(base_selector.format(1, "span")))
+        mainbusiness = str(soup.select(base_selector.format(3, "span")))
+        qualifications = str(soup.select(base_selector.format(5, "span")))
+        preferential = str(soup.select(base_selector.format(7, "span")))
+        welfare = str(soup.select(base_selector.format(9, "span")))
+        technologystack = str(soup.select(base_selector.format(11, "div")))
+
+        soup = str(soup)
+        if '"occupationalCategory":' in soup:  # TODO: 직무 찾기 function으로 빼기
+            if '"validThrough":' in soup:
                 jikmoo = soup[
-                    soup.find('"sub_categories":') + 18 : soup.find('],"position":') - 1
+                    soup.find('"occupationalCategory":')
+                    + 24 : soup.find('"validThrough":')
+                    - 2
                 ]
-
-            jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
-
-            time.sleep(1)
-
-
-            if any(job in job_titles for job in jikmoo_list):
-                cleaned_title = re.sub(
-                    r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
-                )
-                txt_file_path = f"test_{cleaned_title}_{URL.split('/')[-1]}.txt"
-                print(f"채용 공고 : {cleaned_title}/{URL.split('/')[-1]}")
-
-                with open(txt_file_path, "w", encoding="utf-8") as txt_file:
-                    combined_text = (
-                        f"{title}\n"
-                        f"{cleaned_title}\n"
-                        "직무 : "
-                        f"{jikmoo_list}\n"
-                        "근무지역 : "
-                        f"{workplace}\n"
-                        f"{companydescription}\n"
-                        "주요업무\n"
-                        f"{mainbusiness}\n"
-                        "자격요건\n"
-                        f"{qualifications}\n"
-                        "우대사항\n"
-                        f"{preferential}\n"
-                        "혜택 및 복지\n"
-                        f"{welfare}\n"
-                        "기술스택\n"
-                        f"{technologystack}\n"
-                        f"https://www.wanted.co.kr/wd/{URL.split('/')[-1]}\n"
-                    )
-
-                    combined_text_cleaned = re.sub(
-                        r"<span.*?>|amp;|<\/span>|<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,",
-                        "",
-                        combined_text,
-                    )
-                    combined_text_cleaned = re.sub(
-                        r"<br/>", "\n", combined_text_cleaned
-                    )
-                    txt_file.write(combined_text_cleaned + "\n")
-                    data = {combined_text_cleaned.replace("\n", " ")}
-                    serialized_data = json.dumps(
-                        data, default=str, ensure_ascii=False
-                    ).encode("utf-8")
-
-                    producer.send("job-data", value=serialized_data)
-
-                    log_crawling_success(URL)
             else:
-                log_non_dev_related(URL)
+                jikmoo = soup[
+                    soup.find('"occupationalCategory":')
+                    + 24 : soup.find('"employmentType"')
+                    - 2
+                ]
+        elif '"sub_categories":' in soup:
+            jikmoo = soup[
+                soup.find('"sub_categories":') + 18 : soup.find('],"position":') - 1
+            ]
 
-        except requests.exceptions.HTTPError as http_err:
-            log_http_error(URL, http_err)
-        except requests.exceptions.RequestException as req_err:
-            log_request_error(URL, req_err)
-        except Exception as e:
-            log_crawling_error(e)
-            continue
+        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
 
-        completed_count += 1
         time.sleep(1)
+
+        if any(job in variables.job_titles for job in jikmoo_list):
+            cleaned_title = re.sub(
+                r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
+            )
+            txt_file_path = f"test_{cleaned_title}_{url.split('/')[-1]}.txt"
+            print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
+
+            with open(txt_file_path, "w", encoding="utf-8") as txt_file:
+                combined_text = (
+                    f"{title}\n"
+                    f"{cleaned_title}\n"
+                    "직무 : "
+                    f"{jikmoo_list}\n"
+                    "근무지역 : "
+                    f"{workplace}\n"
+                    f"{companydescription}\n"
+                    "주요업무\n"
+                    f"{mainbusiness}\n"
+                    "자격요건\n"
+                    f"{qualifications}\n"
+                    "우대사항\n"
+                    f"{preferential}\n"
+                    "혜택 및 복지\n"
+                    f"{welfare}\n"
+                    "기술스택\n"
+                    f"{technologystack}\n"
+                    f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
+                )
+
+                combined_text_cleaned = re.sub(
+                    r"<span.*?>|amp;|<\/span>|<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,",
+                    "",
+                    combined_text,
+                )
+                combined_text_cleaned = re.sub(r"<br/>", "\n", combined_text_cleaned)
+                txt_file.write(combined_text_cleaned + "\n")
+                data = {combined_text_cleaned.replace("\n", " ")}
+                serialized_data = json.dumps(
+                    data, default=str, ensure_ascii=False
+                ).encode("utf-8")
+
+                producer.send("job-data", value=serialized_data)
+
+                crawling_logging.log_crawling_success(url)
+        else:
+            crawling_logging.log_non_dev_related(url)
+
+    except requests.exceptions.HTTPError as http_err:  # 404
+        crawling_logging.log_http_error(url, http_err)
+    except requests.exceptions.RequestException as req_err:
+        crawling_logging.log_request_error(url, req_err)
+    except Exception as e:
+        crawling_logging.log_crawling_error(e)
+        continue
+
+    time.sleep(1)
 
 logger.removeHandler(file_handler)
 driver.close()
