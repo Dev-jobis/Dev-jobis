@@ -56,3 +56,33 @@ logger.warning("This is a warning message.")
 logger.error("This is an error message.")
 logger.critical("This is a critical message.")
 logger.info("This is an info message.")
+
+
+def log_crawling_start():
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.info("crawling start.", extra=extra_data)
+
+
+def log_crawling_success(url):
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.info(f"success - URL: {url}", extra=extra_data)
+
+
+def log_http_error(url, http_err):
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.error(f"Not found. {http_err}", extra=extra_data)
+
+
+def log_request_error(url, req_err):
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.error(f"fail requests: {req_err}", extra=extra_data)
+
+
+def log_crawling_error(error):
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.error(f"fail crawling: {error}", extra=extra_data)
+
+
+def log_non_dev_related(url):
+    extra_data = {"timestamp": datetime.utcnow()}
+    logger.info(f"this url({url})is not for developer", extra=extra_data)
