@@ -104,12 +104,43 @@ def log_crawling_error(error):
 def log_non_dev_related(url):
     extra_data = {'timestamp': datetime.utcnow()}
     logger.info(f'this url({url})is not for developer', extra=extra_data)
-
+    
+### 아래 주석 부분으로 수정 예정 - 코드 리뷰 때 확인
 def make_url_list(start, end, step):
     url_list = [f"https://www.wanted.co.kr/wd/{i}" for i in range(start, end, step)]
     return url_list
 
 URL_LIST = make_url_list(185000, 186000, 1)
+
+### 루프 코딩을 어떻게 할 것인가
+# def MAKE_URL(start, finish, step):
+#     URL_LIST = []
+    
+#     # 주어진 finish 횟수만큼 반복
+#     for _ in range(finish):
+#         end = start + step
+        
+#         # start부터 end까지의 숫자를 이용하여 URL을 생성하고 리스트에 추가
+#         for i in range(start, end):
+#             url = "https://www.wanted.co.kr/wd/" + str(i)
+#             URL_LIST.append(url)
+        
+#         # 다음 반복을 위해 start 값을 end로 업데이트
+#         start = end      
+    
+#     return URL_LIST
+
+# # MAKE_URL 함수를 사용하여 URL 리스트 생성
+# URL_LIST = MAKE_URL(1, 100, 1)
+
+# # 다음 루프를 위해 start 값을 설정
+# next_start = URL_LIST[-1].split("/")[-1]
+# next_start = int(next_start) + 1
+
+# # 다음 루프를 위한 URL 리스트 생성
+# NEXT_LOOP = MAKE_URL(next_start, 100, 1)
+
+
 
 completed_count = 0
 max_completed_count = len(URL_LIST)
