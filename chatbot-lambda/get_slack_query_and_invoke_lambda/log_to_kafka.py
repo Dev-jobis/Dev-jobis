@@ -17,7 +17,7 @@ kafka_log_producer = KafkaProducer(
 class KafkaHandler(logging.Handler):
     def emit(self, record):
         log_data = self.format(record)
-        kafka_log_producer.send("open-test", value=log_data)
+        kafka_log_producer.send("open-test", value=log_data)  # TODO: 재사용성
         time.sleep(0.05)
 
 
