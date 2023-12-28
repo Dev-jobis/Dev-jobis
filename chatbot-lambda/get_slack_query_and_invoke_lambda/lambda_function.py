@@ -3,14 +3,7 @@ import boto3
 import hmac
 import hashlib
 from datetime import datetime
-
-
-s3 = boto3.client("s3")
-
-
-def get_s3_object(bucket, key, is_string=False):
-    obj = s3.get_object(Bucket=bucket, Key=key)["Body"]  # byte object임에 유의할 것
-    return obj.read().decode("utf-8").rstrip() if is_string else obj
+from utils import SLACK_SIGNING_SECRET
 
 
 def lambda_handler(event, context):
@@ -22,9 +15,6 @@ def lambda_handler(event, context):
             "statusCode": 400,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
         }
-    slack_signing_secret = get_s3_object(
-        "project05-credentials", "slack_signing_secret", is_string=True
-    )  # TODO: parameter store로 변경
     request_body = event["body"]
     time_stamp = event["headers"]["X-Slack-Request-Timestamp"]  # str
 
@@ -50,7 +40,7 @@ def lambda_handler(event, context):
 
     sig_basestring = "v0:" + time_stamp + ":" + request_body
     byte_key = bytes(
-        slack_signing_secret, "UTF-8"
+        SLACK_SIGNING_SECRET, "UTF-8"
     )  # key.encode() would also work in this case
     message = sig_basestring.encode()
 
