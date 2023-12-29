@@ -22,7 +22,7 @@ file_handler.setLevel(logging.DEBUG)
 
 logger = logging.getLogger("example_logger")
 logger.addHandler(file_handler)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 log_data = {
     "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
@@ -34,14 +34,14 @@ log_data = {
 json_log_data = json.dumps(log_data)
 logger.info(json_log_data)
 
-# Kafka 관련 설정
+# # Kafka 관련 설정
 kafka_broker_addresses = os.getenv(
     "kafka_broker_address",
     "175.0.0.139:9092,175.0.0.155:9092,175.0.0.170:9092",
 ).split(",")
 
 producer = KafkaProducer(
-    acks=0,
+    acks=1,
     bootstrap_servers=kafka_broker_addresses,
     value_serializer=lambda x: x,
     metadata_max_age_ms=60000,
@@ -54,11 +54,10 @@ class KafkaHandler(logging.Handler):
         log_data = getattr(record, "log_data", None)
         if log_data:
             producer.send("open-test", value=json.dumps(log_data))
-            time.sleep(0.05)
+            time.sleep(0.1)
 
 
 kafka_handler = KafkaHandler()
-kafka_handler.setLevel(logging.INFO)
 kafka_handler.setLevel(logging.DEBUG)
 logger.addHandler(kafka_handler)
 
@@ -84,7 +83,7 @@ driver.execute_cdp_cmd(
     },
 )
 
-start_url_range = 100
+start_url_range = 100000
 end_url_range = 200000
 
 
@@ -155,10 +154,6 @@ for i, url in enumerate(url_list):
         if companyname:
             data_company_name = companyname[0]["data-company-name"]
 
-        else:
-            logger.info(f"{datetime.utcnow()} url: {url}, 에러: 개발 직군이 아님.")
-            continue  # continue를 사용하여 이후의 코드를 실행하지 않고 다음 반복으로 넘어갑니다.
-
         title = soup.title.text
         base_selector = (
             "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
@@ -216,7 +211,9 @@ for i, url in enumerate(url_list):
                 combined_text_cleaned = re.sub(
                     r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
                 )
-                combined_text_cleaned = re.sub(r"<.*?>|amp;|\[|\]", "", combined_text)
+                combined_text_cleaned = re.sub(
+                    r"<.*?>|amp;|\[|\]", "", combined_text_cleaned
+                )
 
                 txt_file.write(combined_text_cleaned + "\n")
                 data = {combined_text_cleaned.replace("\n", " ")}
@@ -226,7 +223,9 @@ for i, url in enumerate(url_list):
                 producer.send("job-data", value=serialized_data)
 
                 logger.info(f"crawling complete!, url: {url}")
-
+        else:
+            logger.info(f"{datetime.utcnow()} url: {url}, 에러: 개발 직군이 아님.")
+            continue
     except requests.exceptions.HTTPError as http_err:  # 404 등 HTTP 에러가 발생한 경우
         logger.error(f"{datetime.utcnow()} url: {url}, 에러: {http_err}")
         continue
@@ -237,6 +236,5 @@ for i, url in enumerate(url_list):
         logger.error(f"{datetime.utcnow()} url: {url}, 에러: {e}")
         continue
 
-time.sleep(1)
 logger.removeHandler(file_handler)
 driver.close()
