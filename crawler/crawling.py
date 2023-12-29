@@ -200,7 +200,12 @@ for i, url in enumerate(URL_LIST):
             cleaned_title = re.sub(
                 r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
             )
-            txt_file_path = f"test_{cleaned_title}_{url.split('/')[-1]}.txt"
+            txt_file_directory = "txt_file_directory"
+            if not os.path.exists(txt_file_directory):
+                os.mkdir(txt_file_directory)
+            txt_file_path = os.path.join(
+                txt_file_directory, f"test_{cleaned_title}_{url.split('/')[-1]}.txt"
+            )
             print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
 
             with open(txt_file_path, "w", encoding="utf-8") as txt_file:
