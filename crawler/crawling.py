@@ -16,31 +16,12 @@ import json
 import logging
 from datetime import datetime
 import variables
-import crawling_logging
-
-
-class JsonFormatter(logging.Formatter):
-    def __init__(self):
-        super(JsonFormatter, self).__init__()
-
-    def format(self, record):
-        # timestamp = datetime.utcfromtimestamp(record.created).strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        datetime.utcnow()
-        log_data = {
-            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
-            "level": record.levelname,
-            "message": f"{record.getMessage()}",
-            "name": record.name,
-        }
-        record.log_data = log_data
-        return super(JsonFormatter, self).format(record)
-
 
 file_handler = logging.FileHandler("example.log", encoding="utf-8")
-formatter = JsonFormatter()
-file_handler.setFormatter(formatter)
+file_handler.setLevel(logging.DEBUG)
 
-logger = logging.getLogger("crawlinglog")
+logger = logging.getLogger("example_logger")
+logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
 logger.addHandler(file_handler)
@@ -57,7 +38,15 @@ class KafkaHandler(logging.Handler):
                 ),
             )
             time.sleep(0.05)
+log_data = {
+    "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
+    "level": logging.INFO,
+    "message": "Log message",
+    "name": "logger-name",
+}
 
+json_log_data = json.dumps(log_data)
+logger.info(json_log_data)
 
 kafka_broker_addresses = os.getenv(
     "KAFKA_BROKER_ADDRESSES", "170.0.0.139:9092,170.0.0.155:9092,170.0.0.170:9092"
