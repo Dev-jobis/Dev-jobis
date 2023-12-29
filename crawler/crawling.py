@@ -83,21 +83,13 @@ driver.execute_cdp_cmd(
     },
 )
 
-
-### 아래 주석 부분으로 수정 예정 - 코드 리뷰 때 확인
-def make_url_list(start, end, step):
-    url_list = [f"https://www.wanted.co.kr/wd/{i}" for i in range(start, end, step)]
-    return url_list
+start_url_range = 100
+end_url_range = 200000
 
 
-URL_LIST = make_url_list(185000, 186000, 1)
-
-
-## 루프 코딩을 어떻게 할 것인가
 def make_url_list(start, finish):
     url_list = []
 
-    # start부터 end까지의 숫자를 이용하여 URL을 생성하고 리스트에 추가
     for i in range(start, finish):
         url = f"https://www.wanted.co.kr/wd/{i}"
         url_list.append(url)
@@ -105,8 +97,7 @@ def make_url_list(start, finish):
     return url_list
 
 
-# MAKE_URL 함수를 사용하여 URL 리스트 생성
-URL_LIST = make_url_list(1, 100, 1)
+url_list = make_url_list(start_url_range, end_url_range)
 
 
 for i, url in enumerate(URL_LIST):
