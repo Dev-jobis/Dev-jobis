@@ -179,29 +179,6 @@ for i, url in enumerate(URL_LIST):
         welfare = str(soup.select(base_selector.format(9, "span")))
         technologystack = str(soup.select(base_selector.format(11, "div")))
 
-        soup = str(soup)
-        if '"occupationalCategory":' in soup:  # TODO: 직무 찾기 function으로 빼기
-            if '"validThrough":' in soup:
-                jikmoo = soup[
-                    soup.find('"occupationalCategory":')
-                    + 24 : soup.find('"validThrough":')
-                    - 2
-                ]
-            else:
-                jikmoo = soup[
-                    soup.find('"occupationalCategory":')
-                    + 24 : soup.find('"employmentType"')
-                    - 2
-                ]
-        elif '"sub_categories":' in soup:
-            jikmoo = soup[
-                soup.find('"sub_categories":') + 18 : soup.find('],"position":') - 1
-            ]
-
-        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
-
-        time.sleep(1)
-
         if any(job in variables.job_titles for job in jikmoo_list):
             cleaned_title = re.sub(
                 r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
@@ -235,7 +212,6 @@ for i, url in enumerate(URL_LIST):
                     f"{technologystack}\n"
                     f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
                 )
-
                 combined_text_cleaned = re.sub(
                     r"<span.*?>|amp;|<\/span>|<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,",
                     "",
