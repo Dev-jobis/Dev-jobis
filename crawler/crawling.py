@@ -224,19 +224,18 @@ for i, url in enumerate(URL_LIST):
                 ).encode("utf-8")
                 producer.send("job-data", value=serialized_data)
 
-                crawling_logging.log_crawling_success(url)
-        else:
-            crawling_logging.log_non_dev_related(url)
+                logger.info(f"crawling complete!, url: {url}")
 
-    except requests.exceptions.HTTPError as http_err:  # 404
-        crawling_logging.log_http_error(url, http_err)
-    except requests.exceptions.RequestException as req_err:
-        crawling_logging.log_request_error(url, req_err)
-    except Exception as e:
-        crawling_logging.log_crawling_error(e)
+    except requests.exceptions.HTTPError as http_err:  # 404 등 HTTP 에러가 발생한 경우
+        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {http_err}")
+        continue
+    except requests.exceptions.RequestException as req_err:  # 기타 Request 예외가 발생한 경우
+        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {req_err}")
+        continue
+    except Exception as e:  # 기타 예외가 발생한 경우
+        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {e}")
         continue
 
-    time.sleep(1)
-
+time.sleep(1)
 logger.removeHandler(file_handler)
 driver.close()
