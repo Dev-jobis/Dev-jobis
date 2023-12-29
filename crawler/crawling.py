@@ -213,17 +213,15 @@ for i, url in enumerate(URL_LIST):
                     f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
                 )
                 combined_text_cleaned = re.sub(
-                    r"<span.*?>|amp;|<\/span>|<div.*?>|<\/div>|<h3>|<\/h3>|\]|\[|,",
-                    "",
-                    combined_text,
+                    r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
                 )
-                combined_text_cleaned = re.sub(r"<br/>", "\n", combined_text_cleaned)
+                combined_text_cleaned = re.sub(r"<.*?>|amp;|\[|\]", "", combined_text)
+
                 txt_file.write(combined_text_cleaned + "\n")
                 data = {combined_text_cleaned.replace("\n", " ")}
                 serialized_data = json.dumps(
                     data, default=str, ensure_ascii=False
                 ).encode("utf-8")
-
                 producer.send("job-data", value=serialized_data)
 
                 crawling_logging.log_crawling_success(url)
