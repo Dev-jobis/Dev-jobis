@@ -104,21 +104,45 @@ for i, url in enumerate(URL_LIST):
     try:
         # 1. 접근 가능한 페이지인지 확인
         response = requests.get(url)
-        response.raise_for_status()  # TODO: 어떤 경우 있는지 확인
-
+        response.raise_for_status()  # HTTP 상태 코드가 200이 아니면 예외 발생
         driver.get(url)
         WebDriverWait(driver, 20).until(
             lambda driver: driver.execute_script("return document.readyState")
             == "complete"
         )
 
-        crawling_logging.log_crawling_start()
-
-        # 2. 개발 공고인지 확인
-
-        # 3. 개발 공고면 크롤링 해서 저장
         page_source = driver.page_source
         soup = bs(page_source, "html.parser")
+
+        logger.info(f"crawling start, url: {url}")
+
+        # 2. 개발 공고인지 확인
+        if '"occupationalCategory":' in page_source:
+            if '"validThrough":' in page_source:
+                jikmoo = page_source[
+                    page_source.find('"occupationalCategory":')
+                    + 24 : page_source.find('"validThrough":')
+                    - 2
+                ]
+            else:
+                jikmoo = page_source[
+                    page_source.find('"occupationalCategory":')
+                    + 24 : page_source.find('"employmentType"')
+                    - 2
+                ]
+        elif '"sub_categories":' in page_source:
+            jikmoo = page_source[
+                page_source.find('"sub_categories":')
+                + 18 : page_source.find('],"position":')
+                - 1
+            ]
+        else:
+            continue
+
+        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
+        time.sleep(1)
+
+        # 3. 개발 공고면 크롤링 해서 저장
 
         companyname = soup.select(
             "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
@@ -129,6 +153,10 @@ for i, url in enumerate(URL_LIST):
 
         if companyname:
             data_company_name = companyname[0]["data-company-name"]
+
+        else:
+            logger.info(f"{datetime.utcnow()} url: {url}, 에러: 개발 직군이 아님.")
+            continue  # continue를 사용하여 이후의 코드를 실행하지 않고 다음 반복으로 넘어갑니다.
 
         title = soup.title.text
         base_selector = (
