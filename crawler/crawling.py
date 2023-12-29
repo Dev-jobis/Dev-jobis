@@ -24,20 +24,6 @@ logger = logging.getLogger("example_logger")
 logger.addHandler(file_handler)
 logger.setLevel(logging.INFO)
 
-logger.addHandler(file_handler)
-
-
-class KafkaHandler(logging.Handler):
-    def emit(self, record):
-        log_data = getattr(record, "log_data", None)
-        if log_data:
-            producer.send(
-                "open-test",
-                value=json.dumps(log_data, default=str, ensure_ascii=False).encode(
-                    "utf-8"
-                ),
-            )
-            time.sleep(0.05)
 log_data = {
     "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
     "level": logging.INFO,
@@ -48,8 +34,10 @@ log_data = {
 json_log_data = json.dumps(log_data)
 logger.info(json_log_data)
 
+# Kafka 관련 설정
 kafka_broker_addresses = os.getenv(
-    "KAFKA_BROKER_ADDRESSES", "170.0.0.139:9092,170.0.0.155:9092,170.0.0.170:9092"
+    "kafka_broker_address",
+    "175.0.0.139:9092,175.0.0.155:9092,175.0.0.170:9092",
 ).split(",")
 
 producer = KafkaProducer(
@@ -59,9 +47,19 @@ producer = KafkaProducer(
     metadata_max_age_ms=60000,
     request_timeout_ms=30000,
 )
+
+
+class KafkaHandler(logging.Handler):
+    def emit(self, record):
+        log_data = getattr(record, "log_data", None)
+        if log_data:
+            producer.send("open-test", value=json.dumps(log_data))
+            time.sleep(0.05)
+
+
 kafka_handler = KafkaHandler()
 kafka_handler.setLevel(logging.INFO)
-kafka_handler.setFormatter(formatter)
+kafka_handler.setLevel(logging.DEBUG)
 logger.addHandler(kafka_handler)
 
 chrome_options = Options()
