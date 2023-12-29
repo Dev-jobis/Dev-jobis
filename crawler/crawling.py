@@ -62,6 +62,7 @@ kafka_handler.setLevel(logging.INFO)
 kafka_handler.setLevel(logging.DEBUG)
 logger.addHandler(kafka_handler)
 
+
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 chrome_options.add_experimental_option("detach", True)
@@ -100,7 +101,7 @@ def make_url_list(start, finish):
 url_list = make_url_list(start_url_range, end_url_range)
 
 
-for i, url in enumerate(URL_LIST):
+for i, url in enumerate(url_list):
     try:
         # 1. 접근 가능한 페이지인지 확인
         response = requests.get(url)
