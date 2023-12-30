@@ -3,21 +3,10 @@ import logging
 from datetime import datetime
 import openai
 import pinecone
-from utils import get_s3_object
+from utils import OPENAI_API_KEY, PINECONE_API_KEY
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("WantedChatBot")
-logger.setLevel(logging.INFO)
-
-
-# TODO: parameter store로 대체
-os.environ["OPENAI_API_KEY"] = get_s3_object(
-    "project05-credentials", "openai_sojung", is_string=True
-)
-PINECONE_API_KEY = get_s3_object(
-    "project05-credentials", "pinecone_sojung", is_string=True
-)
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
 
 
