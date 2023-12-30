@@ -32,7 +32,7 @@ class WantedChatBot:
         self.openai_client = openai.OpenAI()
         self.context = self.get_related_contexts()
         self.augmented_query = self.make_augmented_query()
-        self.answer = self.make_answer()
+        self.answer = self.make_answer()  # generator
 
     def init_pinecone_index(self, index_name):
         logger.info("%s pinecone init ...", datetime.utcnow())
@@ -51,6 +51,7 @@ class WantedChatBot:
         res = self.pinecone_index.query(xq, top_k=self.k, include_metadata=True)
         # similarity 가 특정 threshold 를 넘는 것만 뽑아와야 할텐데
         related_contexts = [item["metadata"]["text"] for item in res["matches"]]
+        logger.info(related_contexts)
         return related_contexts
 
     def make_augmented_query(self):
@@ -62,7 +63,7 @@ class WantedChatBot:
 
     def make_answer(self):
         logger.info("%s making answer ... ", datetime.utcnow())
-        res = self.openai_client.chat.completions.create(
+        stream = self.openai_client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
                 {"role": "system", "content": self.primer},
@@ -70,6 +71,8 @@ class WantedChatBot:
             ],
             stop="4",
             temperature=0,
+            stream=True,
         )
-        logger.info("%s making answer ... Done", datetime.utcnow())
-        return f"질문 : {self.query} \n답변 : {res.choices[0].message.content} \n토큰사용:{res.usage}"
+        logger.info(stream)
+        for chunk in stream:
+            yield chunk.choices[0].delta.content or ""
