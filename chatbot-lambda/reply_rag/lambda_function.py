@@ -1,19 +1,12 @@
 import json
 from slack_bolt import App
 from rag import WantedChatBot
-from utils import get_s3_object
+from utils import SLACK_SIGNING_SECRET, SLACK_BOT_TOKEN
 
-
-slack_bot_token = get_s3_object(
-    "project05-credentials", "slack_bot_token", is_string=True
-)  # TODO: parameter store로 대체
-slack_signing_secret = get_s3_object(
-    "project05-credentials", "slack_signing_secret", is_string=True
-)
 
 app = App(
-    token=slack_bot_token,  # bot user token
-    signing_secret=slack_signing_secret,
+    token=SLACK_BOT_TOKEN,  # bot user token
+    signing_secret=SLACK_SIGNING_SECRET,
 )
 slack_client = app.client
 
