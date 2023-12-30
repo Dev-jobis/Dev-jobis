@@ -1,6 +1,7 @@
 import json
 from slack_bolt import App
 from rag import WantedChatBot
+from log_to_kafka import CustomLogger
 from utils import SLACK_SIGNING_SECRET, SLACK_BOT_TOKEN
 
 
@@ -10,9 +11,11 @@ app = App(
 )
 slack_client = app.client
 
+logger = CustomLogger("lambda-slack-02")
+
 
 def lambda_handler(event, context):
-    print("EVENT : ", event)
+    logger.send_json_log("Start Lambda...")
     # TODO: logging - invoke 시 사용자 질문이 잘 넘어 왔는지, 누구로부터 넘어왔고, 언제 넘어왔고, 어떤 내용인지
     msg_info = event["event"]
 
@@ -47,5 +50,5 @@ def lambda_handler(event, context):
         slack_client.chat_postMessage(
             channel=questioner_channel, text=ans
         )  # TODO: 마지막이 자연스럽게 나오려면?
-
+    logger.send_json_log("Chatbot Answering Done.")
     return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}

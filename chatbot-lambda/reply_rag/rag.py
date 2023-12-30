@@ -1,13 +1,14 @@
 import os
-import logging
 from datetime import datetime
 import openai
 import pinecone
 from utils import OPENAI_API_KEY, PINECONE_API_KEY
+from log_to_kafka import CustomLogger
 
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
+logger = CustomLogger("lambda-slack-02")
 
 
 class WantedChatBot:
@@ -24,12 +25,12 @@ class WantedChatBot:
         self.answer = self.make_answer()  # generator
 
     def init_pinecone_index(self, index_name):
-        logger.info("%s pinecone init ...", datetime.utcnow())
+        logger.send_json_log("pinecone init ...")
         pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
         index_name = "test-metadata"
         index = pinecone.Index(index_name)
         print(index.describe_index_stats())
-        logger.info("%s pinecone init ... DONE", datetime.utcnow())
+        logger.send_json_log("pinecone init ... DONE")
         return index
 
     def get_related_contexts(self):
@@ -40,18 +41,19 @@ class WantedChatBot:
         res = self.pinecone_index.query(xq, top_k=self.k, include_metadata=True)
         # similarity 가 특정 threshold 를 넘는 것만 뽑아와야 할텐데
         related_contexts = [item["metadata"]["text"] for item in res["matches"]]
-        logger.info(related_contexts)
+        logger.send_json_log(
+            message="related context is ready", extra_data=related_contexts
+        )
         return related_contexts
 
     def make_augmented_query(self):
         augmented_query = (
             "\n\n---\n\n".join(self.context) + "\n\n-----\n\n" + self.query
         )
-        logger.info("%s augmented query : %s", datetime.utcnow(), augmented_query)
         return augmented_query
 
     def make_answer(self):
-        logger.info("%s making answer ... ", datetime.utcnow())
+        logger.send_json_log("start making answer ... ")
         stream = self.openai_client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
@@ -62,6 +64,6 @@ class WantedChatBot:
             temperature=0,
             stream=True,
         )
-        logger.info(stream)
+        logger.send_json_log("answer is ready")
         for chunk in stream:
             yield chunk.choices[0].delta.content or ""
