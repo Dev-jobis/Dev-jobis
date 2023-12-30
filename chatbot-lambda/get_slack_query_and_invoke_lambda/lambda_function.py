@@ -3,14 +3,20 @@ import boto3
 import hmac
 import hashlib
 from datetime import datetime
+import logging
+from log_to_kafka import CustomLogger
 from utils import SLACK_SIGNING_SECRET
+
+logger = CustomLogger("lambda-slack-01")
 
 
 def lambda_handler(event, context):
-    print("CHAT RECEIVED EVENT: ", event)
+    logger.send_json_log(
+        message="Get Chatbot Query", extra_data=event, log_level=logging.INFO
+    )
 
     if "X-Slack-Signature" not in event["headers"]:
-        print("not from slack")  # TODO: logging으로 교체
+        logger.send_json_log(message="Not from Slack", log_level=logging.WARNING)
         return {
             "statusCode": 400,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
@@ -32,7 +38,7 @@ def lambda_handler(event, context):
     if abs(datetime.now().timestamp() - int(time_stamp)) > 60 * 5:
         # The request timestamp is more than five minutes from local time.
         # It could be a replay attack, so let's ignore it.
-        print("time not match")  # TODO: logging으로 교체
+        logger.send_json_log(message="Time Not Match.", log_level=logging.WARNING)
         return {
             "statusCode": 400,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
@@ -48,7 +54,7 @@ def lambda_handler(event, context):
     my_signature = "v0=" + hmac.new(byte_key, message, hashlib.sha256).hexdigest()
     x_slack_signature = event["headers"]["X-Slack-Signature"]
     if hmac.compare_digest(my_signature, x_slack_signature):
-        print("match")  # TODO: logging으로 교체
+        logger.send_json_log(message="Match.")
         lambda_client = boto3.client("lambda")
         response = lambda_client.invoke(
             FunctionName="chat_to_slack",
@@ -57,6 +63,7 @@ def lambda_handler(event, context):
             ClientContext="frompythontest",
             Payload=bytes(request_body, "utf-8"),
         )
+        logger.send_json_log(message="Chatbot Lambda Invoke Done.")
         return {
             "statusCode": 200,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
