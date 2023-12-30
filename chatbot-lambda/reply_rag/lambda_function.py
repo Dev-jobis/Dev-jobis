@@ -42,7 +42,7 @@ def lambda_handler(event, context):
     for res in response:
         ans += res
         i += 1
-        if i > 40 and ans[-1] in [" ", ", ", ".", "\n"]:
+        if i > 30 and ans[-1] in [" ", ",", ".", "\n"]:
             slack_client.chat_postMessage(channel=questioner_channel, text=ans)
             i = 0
             ans = ""
