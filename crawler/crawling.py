@@ -19,6 +19,7 @@ import variables
 import schedule
 from threading import Thread
 from log_to_kafka import CustomLogger, kafka_log_producer
+from utils import URL_RANGE_value
 
 logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
@@ -43,47 +44,21 @@ driver.execute_cdp_cmd(
     },
 )
 
-start_url_range = 189900
-end_url_range = 190000
+start_url_range = int(URL_RANGE_value)
+end_url_range = start_url_range + 3000
 
 
-def make_url_list(start, finish):
+def make_url_list(start, end):
     url_list = []
-    for i in range(start, finish):
+    for i in range(start, end):
         url = f"https://www.wanted.co.kr/wd/{i}"
         url_list.append(url)
     return url_list
 
 
-def append_url_batch(url_list, start, batch_size):
-    for i in range(start, start + batch_size):
-        url = f"https://www.wanted.co.kr/wd/{i}"
-        url_list.append(url)
-    return url_list, start + batch_size
-
-
-def job():
-    global url_list, current_start
-    batch_size = 200
-    url_list, current_start = append_url_batch(url_list, current_start, batch_size)
-
-
-def run_scheduler():
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-
-
 url_list = make_url_list(start_url_range, end_url_range)
-current_start = end_url_range + 1
 
-schedule.every().day.at("00:00").do(job)
-
-scheduler_thread = Thread(target=run_scheduler)
-scheduler_thread.start()
-
-
-for i, url in enumerate(url_list):
+for url in url_list:
     try:
         # 1. 접근 가능한 페이지인지 확인
         response = requests.get(url)
