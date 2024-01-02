@@ -14,7 +14,6 @@ from langchain.schema import Document
 from utils import OPENAI_API_KEY, PINECONE_API_KEY
 
 
-# TODO: parameter store로 대체
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
 
