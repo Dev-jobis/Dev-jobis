@@ -218,21 +218,21 @@ for i, url in enumerate(url_list):
                     log_level=logging.INFO,
                 )
 
-    except requests.exceptions.HTTPError as http_err:  # 404 등 HTTP 에러가 발생한 경우
+    except requests.exceptions.HTTPError as http_err:
         logger.send_json_log(
             message="No Webpage.",
             extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
             log_level=logging.ERROR,
         )
         continue
-    except requests.exceptions.RequestException as req_err:  # 기타 Request 예외가 발생한 경우
+    except requests.exceptions.RequestException as req_err:
         logger.send_json_log(
             message="Request Error.",
             extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
             log_level=logging.ERROR,
         )
         continue
-    except Exception as e:  # 기타 예외가 발생한 경우
+    except Exception as e:
         logger.send_json_log(
             message="Exception Error.",
             extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
