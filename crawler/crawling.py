@@ -212,6 +212,7 @@ for i, url in enumerate(url_list):
                 ).encode("utf-8")
 
                 KafkaProducer.send("job-data", value=serialized_data)
+                time.sleep(0.1)
                 logger.send_json_log(
                     message="crawling complete.",
                     extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
