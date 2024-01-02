@@ -43,11 +43,13 @@ driver.execute_cdp_cmd(
     },
 )
 
+start_url_range = 189900
+end_url_range = 190000
+
 
 def make_url_list(start, finish):
     url_list = []
     for i in range(start, finish):
-        i = start_url_range
         url = f"https://www.wanted.co.kr/wd/{i}"
         url_list.append(url)
     return url_list
@@ -72,8 +74,6 @@ def run_scheduler():
         time.sleep(1)
 
 
-start_url_range = 1
-end_url_range = 190000
 url_list = make_url_list(start_url_range, end_url_range)
 current_start = end_url_range + 1
 
@@ -98,7 +98,7 @@ for i, url in enumerate(url_list):
         soup = bs(page_source, "html.parser")
         logger.send_json_log(
             message="crawling start.",
-            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            extra_data={"url": url},
             log_level=logging.INFO,
         )
         # 2. 개발 공고인지 확인
@@ -142,7 +142,7 @@ for i, url in enumerate(url_list):
         else:
             logger.send_json_log(
                 message="No Develop job.",
-                extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+                extra_data={"url": url},
                 log_level=logging.WARNING,
             )
             continue
@@ -216,28 +216,28 @@ for i, url in enumerate(url_list):
                 time.sleep(0.1)
                 logger.send_json_log(
                     message="crawling complete.",
-                    extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+                    extra_data={"url": url},
                     log_level=logging.INFO,
                 )
 
     except requests.exceptions.HTTPError as http_err:
         logger.send_json_log(
             message="No Webpage.",
-            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            extra_data={"url": url},
             log_level=logging.ERROR,
         )
         continue
     except requests.exceptions.RequestException as req_err:
         logger.send_json_log(
             message="Request Error.",
-            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            extra_data={"url": url},
             log_level=logging.ERROR,
         )
         continue
     except Exception as e:
         logger.send_json_log(
             message="Exception Error.",
-            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            extra_data={"url": url},
             log_level=logging.ERROR,
         )
         continue
