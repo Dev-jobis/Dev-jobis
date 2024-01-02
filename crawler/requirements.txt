@@ -5,4 +5,4 @@ selenium
 webdriver-manager
 kafka-handler
 chromedriver-autoinstaller
-schedule
+boto3
