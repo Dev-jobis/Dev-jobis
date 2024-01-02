@@ -11,23 +11,11 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders.s3_file import S3FileLoader
 from langchain_community.document_loaders.s3_directory import S3DirectoryLoader
 from langchain.schema import Document
-
-
-s3 = boto3.client("s3")
-
-
-def get_s3_object(bucket, key, is_string=False):
-    obj = s3.get_object(Bucket=bucket, Key=key)["Body"]  # byte object
-    return obj.read().decode("utf-8").rstrip() if is_string else obj
+from utils import OPENAI_API_KEY, PINECONE_API_KEY
 
 
 # TODO: parameter store로 대체
-os.environ["OPENAI_API_KEY"] = get_s3_object(
-    "project05-credentials", "openai_sojung", is_string=True
-)
-PINECONE_API_KEY = get_s3_object(
-    "project05-credentials", "pinecone_sojung", is_string=True
-)
+os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
 
 
