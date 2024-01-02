@@ -47,6 +47,7 @@ driver.execute_cdp_cmd(
 def make_url_list(start, finish):
     url_list = []
     for i in range(start, finish):
+        i = start_url_range
         url = f"https://www.wanted.co.kr/wd/{i}"
         url_list.append(url)
     return url_list
