@@ -14,5 +14,5 @@ response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
 PINECONE_API_KEY = response["Parameter"]["Value"]
 
 parameter_name = "/SESAC/OPENAI/API_KEY"
-response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)  # 복호화 옵션
+response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
 OPENAI_API_KEY = response["Parameter"]["Value"]
