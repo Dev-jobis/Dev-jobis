@@ -144,7 +144,7 @@ for i, url in enumerate(url_list):
                 extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
                 log_level=logging.WARNING,
             )
-            continue  # continue를 사용하여 이후의 코드를 실행하지 않고 다음 반복으로 넘어갑니다.
+            continue
 
         title = soup.title.text
         base_selector = (
@@ -198,6 +198,7 @@ for i, url in enumerate(url_list):
                     f"{welfare}\n"
                     "기술스택\n"
                     f"{technologystack}\n"
+                    f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
                 )
                 combined_text_cleaned = re.sub(
                     r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
