@@ -18,7 +18,7 @@ from datetime import datetime
 import variables
 import schedule
 from threading import Thread
-from log_to_kafka import CustomLogger
+from log_to_kafka import CustomLogger, kafka_log_producer
 
 logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
@@ -179,7 +179,6 @@ for i, url in enumerate(url_list):
                 txt_file_directory, f"test_{cleaned_title}_{url.split('/')[-1]}.txt"
             )
             print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
-
             with open(txt_file_path, "w", encoding="utf-8") as txt_file:
                 combined_text = (
                     f"{title}\n"
@@ -208,20 +207,20 @@ for i, url in enumerate(url_list):
 
                 txt_file.write(combined_text_cleaned + "\n")
                 data = {combined_text_cleaned.replace("\n", " ")}
-                serialized_data = json.dumps(
-                    data, default=str, ensure_ascii=False
-                ).encode("utf-8")
-
-            log_to_kafka.kafka_log_producer.send(
-                "job-data", value=serialized_data.encode("utf-8")
-            )
+            kafka_log_producer.send("job-data", value=combined_text_cleaned)
             time.sleep(0.1)
-
             logger.send_json_log(
                 message="crawling complete.",
                 extra_data={"url": url},
                 log_level=logging.INFO,
             )
+        else:
+            logger.send_json_log(
+                message="No Develop job.",
+                extra_data={"url": url},
+                log_level=logging.WARNING,
+            )
+            continue
 
     except requests.exceptions.HTTPError as http_err:
         logger.send_json_log(
@@ -246,4 +245,8 @@ for i, url in enumerate(url_list):
         continue
 
 time.sleep(1)
+logger.send_json_log(
+    message="crawling is Done.",
+    log_level=logging.INFO,
+)
 driver.close()
