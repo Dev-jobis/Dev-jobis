@@ -41,9 +41,7 @@ class WantedChatBot:
         res = self.pinecone_index.query(xq, top_k=self.k, include_metadata=True)
         # similarity 가 특정 threshold 를 넘는 것만 뽑아와야 할텐데
         related_contexts = [item["metadata"]["text"] for item in res["matches"]]
-        logger.send_json_log(
-            message="related context is ready", extra_data=related_contexts
-        )
+        logger.send_json_log(message="related context is ready.")
         return related_contexts
 
     def make_augmented_query(self):
