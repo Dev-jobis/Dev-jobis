@@ -86,7 +86,7 @@ for i, url in enumerate(url_list):
     try:
         # 1. 접근 가능한 페이지인지 확인
         response = requests.get(url)
-        response.raise_for_status()  # HTTP 상태 코드가 200이 아니면 예외 발생
+        response.raise_for_status()
         driver.get(url)
         WebDriverWait(driver, 20).until(
             lambda driver: driver.execute_script("return document.readyState")
@@ -198,21 +198,17 @@ for i, url in enumerate(url_list):
                     f"{welfare}\n"
                     "기술스택\n"
                     f"{technologystack}\n"
-                    f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
                 )
                 combined_text_cleaned = re.sub(
                     r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
                 )
-                combined_text_cleaned = re.sub(
-                    r"<.*?>|amp;|\[|\]", "", combined_text_cleaned
-                )
+                combined_text_cleaned = re.sub(r"<.*?>|amp;|\[|\]", "", combined_text)
 
                 txt_file.write(combined_text_cleaned + "\n")
                 data = {combined_text_cleaned.replace("\n", " ")}
                 serialized_data = json.dumps(
                     data, default=str, ensure_ascii=False
                 ).encode("utf-8")
-                producer.send("job-data", value=serialized_data)
 
                 KafkaProducer.send("job-data", value=serialized_data)
                 logger.send_json_log(
