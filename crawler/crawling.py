@@ -18,7 +18,7 @@ from datetime import datetime
 import variables
 import schedule
 from threading import Thread
-from crawler.log_to_kafka import CustomLogger
+from log_to_kafka import CustomLogger
 
 logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
