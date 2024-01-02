@@ -17,50 +17,7 @@ import logging
 from datetime import datetime
 import variables
 
-file_handler = logging.FileHandler("example.log", encoding="utf-8")
-file_handler.setLevel(logging.DEBUG)
-
-logger = logging.getLogger("example_logger")
-logger.addHandler(file_handler)
-logger.setLevel(logging.DEBUG)
-
-log_data = {
-    "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
-    "level": logging.INFO,
-    "message": "Log message",
-    "name": "logger-name",
-}
-
-json_log_data = json.dumps(log_data)
-logger.info(json_log_data)
-
-# # Kafka 관련 설정
-kafka_broker_addresses = os.getenv(
-    "kafka_broker_address",
-    "175.0.0.139:9092,175.0.0.155:9092,175.0.0.170:9092",
-).split(",")
-
-producer = KafkaProducer(
-    acks=1,
-    bootstrap_servers=kafka_broker_addresses,
-    value_serializer=lambda x: x,
-    metadata_max_age_ms=60000,
-    request_timeout_ms=30000,
-)
-
-
-class KafkaHandler(logging.Handler):
-    def emit(self, record):
-        log_data = getattr(record, "log_data", None)
-        if log_data:
-            producer.send("open-test", value=json.dumps(log_data))
-            time.sleep(0.1)
-
-
-kafka_handler = KafkaHandler()
-kafka_handler.setLevel(logging.DEBUG)
-logger.addHandler(kafka_handler)
-
+logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -113,9 +70,11 @@ for i, url in enumerate(url_list):
 
         page_source = driver.page_source
         soup = bs(page_source, "html.parser")
-
-        logger.info(f"crawling start, url: {url}")
-
+        logger.send_json_log(
+            message="crawling start.",
+            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            log_level=logging.INFO,
+        )
         # 2. 개발 공고인지 확인
         if '"occupationalCategory":' in page_source:
             if '"validThrough":' in page_source:
@@ -153,6 +112,14 @@ for i, url in enumerate(url_list):
 
         if companyname:
             data_company_name = companyname[0]["data-company-name"]
+
+        else:
+            logger.send_json_log(
+                message="No Develop job.",
+                extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+                log_level=logging.WARNING,
+            )
+            continue  # continue를 사용하여 이후의 코드를 실행하지 않고 다음 반복으로 넘어갑니다.
 
         title = soup.title.text
         base_selector = (
@@ -222,19 +189,34 @@ for i, url in enumerate(url_list):
                 ).encode("utf-8")
                 producer.send("job-data", value=serialized_data)
 
-                logger.info(f"crawling complete!, url: {url}")
-        else:
-            logger.info(f"{datetime.utcnow()} url: {url}, 에러: 개발 직군이 아님.")
-            continue
+                KafkaProducer.send("job-data", value=serialized_data)
+                logger.send_json_log(
+                    message="crawling complete.",
+                    extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+                    log_level=logging.INFO,
+                )
+
     except requests.exceptions.HTTPError as http_err:  # 404 등 HTTP 에러가 발생한 경우
-        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {http_err}")
+        logger.send_json_log(
+            message="No Webpage.",
+            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            log_level=logging.ERROR,
+        )
         continue
     except requests.exceptions.RequestException as req_err:  # 기타 Request 예외가 발생한 경우
-        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {req_err}")
+        logger.send_json_log(
+            message="Request Error.",
+            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            log_level=logging.ERROR,
+        )
         continue
     except Exception as e:  # 기타 예외가 발생한 경우
-        logger.error(f"{datetime.utcnow()} url: {url}, 에러: {e}")
+        logger.send_json_log(
+            message="Exception Error.",
+            extra_data={"url": f"https://www.wanted.co.kr/wd/{i}"},
+            log_level=logging.ERROR,
+        )
         continue
 
-logger.removeHandler(file_handler)
+time.sleep(1)
 driver.close()
