@@ -68,7 +68,6 @@ for url in url_list:
             lambda driver: driver.execute_script("return document.readyState")
             == "complete"
         )
-
         page_source = driver.page_source
         soup = bs(page_source, "html.parser")
         logger.send_json_log(
@@ -115,14 +114,9 @@ for url in url_list:
             data_company_name = companyname[0]["data-company-name"]
 
         else:
-            logger.send_json_log(
-                message="No Develop job.",
-                extra_data={"url": url},
-                log_level=logging.WARNING,
-            )
             continue
 
-        title = soup.title.text
+        title = re.sub(r"\| 원티드", "", soup.title.text)
         base_selector = (
             "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
             "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
@@ -141,7 +135,10 @@ for url in url_list:
         qualifications = str(soup.select(base_selector.format(5, "span")))
         preferential = str(soup.select(base_selector.format(7, "span")))
         welfare = str(soup.select(base_selector.format(9, "span")))
-        technologystack = str(soup.select(base_selector.format(11, "div")))
+        technologystack_nonedit = str(soup.select(base_selector.format(11, "div")))
+        technologystack = re.sub(
+            r"<div.*?>(.*?)<\/div>", r"\1 ", technologystack_nonedit
+        )
 
         if any(job in variables.job_titles for job in jikmoo_list):
             cleaned_title = re.sub(
@@ -157,7 +154,6 @@ for url in url_list:
             with open(txt_file_path, "w", encoding="utf-8") as txt_file:
                 combined_text = (
                     f"{title}\n"
-                    f"{cleaned_title}\n"
                     "직무 : "
                     f"{jikmoo_list}\n"
                     "근무지역 : "
@@ -173,13 +169,13 @@ for url in url_list:
                     f"{welfare}\n"
                     "기술스택\n"
                     f"{technologystack}\n"
-                    f"https://www.wanted.co.kr/wd/{url.split('/')[-1]}\n"
                 )
                 combined_text_cleaned = re.sub(
                     r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
                 )
-                combined_text_cleaned = re.sub(r"<.*?>|amp;|\[|\]", "", combined_text)
-
+                combined_text_cleaned = re.sub(
+                    r"<.*?>|amp;|\[|\]|'| 원티드'", "", combined_text_cleaned
+                )
                 txt_file.write(combined_text_cleaned + "\n")
                 data = {combined_text_cleaned.replace("\n", " ")}
             kafka_log_producer.send("job-data", value=combined_text_cleaned)
