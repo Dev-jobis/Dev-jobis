@@ -212,13 +212,16 @@ for i, url in enumerate(url_list):
                     data, default=str, ensure_ascii=False
                 ).encode("utf-8")
 
-                KafkaProducer.send("job-data", value=serialized_data)
-                time.sleep(0.1)
-                logger.send_json_log(
-                    message="crawling complete.",
-                    extra_data={"url": url},
-                    log_level=logging.INFO,
-                )
+            log_to_kafka.kafka_log_producer.send(
+                "job-data", value=serialized_data.encode("utf-8")
+            )
+            time.sleep(0.1)
+
+            logger.send_json_log(
+                message="crawling complete.",
+                extra_data={"url": url},
+                log_level=logging.INFO,
+            )
 
     except requests.exceptions.HTTPError as http_err:
         logger.send_json_log(
