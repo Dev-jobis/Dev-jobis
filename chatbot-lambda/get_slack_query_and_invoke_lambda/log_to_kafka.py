@@ -4,6 +4,7 @@ import logging
 import time
 from kafka import KafkaProducer
 
+TOPIC = "open-test"  # 이 부분 수정하여 사용
 kafka_log_producer = KafkaProducer(
     bootstrap_servers=[
         "175.0.0.139:9092",  # TODO: parameter store로 대체
@@ -17,7 +18,7 @@ kafka_log_producer = KafkaProducer(
 class KafkaHandler(logging.Handler):
     def emit(self, record):
         log_data = self.format(record)
-        kafka_log_producer.send("open-test", value=log_data)
+        kafka_log_producer.send(TOPIC, value=log_data)
         time.sleep(0.1)
 
 
@@ -38,7 +39,7 @@ class CustomLogger:
         message,
         log_level=None,
         timestamp=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
-        extra_data="",
+        extra_data=dict(),
     ):
         if log_level is None:
             log_level = self.default_level
