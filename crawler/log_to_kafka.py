@@ -4,7 +4,7 @@ import logging
 import time
 from kafka import KafkaProducer
 
-TOPIC = "open-test"
+TOPIC = "crawling-log-test"
 kafka_log_producer = KafkaProducer(
     bootstrap_servers=[
         "175.0.0.139:9092",  # TODO: parameter store로 대체
@@ -39,7 +39,7 @@ class CustomLogger:
         message,
         log_level=None,
         timestamp=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
-        extra_data=dict(),
+        extra_data=None,
     ):
         if log_level is None:
             log_level = self.default_level
