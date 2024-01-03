@@ -150,8 +150,12 @@ while crawling_count < get_url_process:
             technologystack = re.sub(
                 r"<div.*?>(.*?)<\/div>", r"\1 ", technologystack_nonedit
             )
-            print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
-            with open(txt_file_path, "w", encoding="utf-8") as txt_file:
+
+            if any(job in variables.job_titles for job in jikmoo_list):
+                cleaned_title = re.sub(
+                    r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
+                )
+                print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
                 combined_text = (
                     f"{title}\n"
                     "직무 : "
@@ -176,10 +180,6 @@ while crawling_count < get_url_process:
                 combined_text_cleaned = re.sub(
                     r"<.*?>|amp;|\[|\]|'| 원티드'", "", combined_text_cleaned
                 )
-                txt_file.write(combined_text_cleaned + "\n")
-                data = {combined_text_cleaned.replace("\n", " ")}
-            kafka_log_producer.send("job-data", value=combined_text_cleaned)
-            time.sleep(0.1)
 
                 kafka_log_producer.send("job-data", value=combined_text_cleaned)
                 time.sleep(0.1)
