@@ -200,17 +200,17 @@ while crawling_count < get_url_process:
             crawling_count += 1
         except requests.exceptions.HTTPError as http_err:
             logger.send_json_log(
-                message="crawling complete.",
-                timestamp=datetime.utcnow(),
-                extra_data={"url": url},
-                log_level=logging.INFO,
-            )
-        else:
-            logger.send_json_log(
-                message="No Develop job.",
+                message="No Webpage.",
                 timestamp=datetime.utcnow(),
                 extra_data={"url": url},
                 log_level=logging.WARNING,
+            )
+        else:
+            logger.send_json_log(
+                message=f"Request Error: {str(req_err)}",
+                timestamp=datetime.utcnow(),
+                extra_data={"url": url},
+                log_level=logging.ERROR,
             )
             break
         except Exception as e:
