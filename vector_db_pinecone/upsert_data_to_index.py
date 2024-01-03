@@ -112,3 +112,4 @@ for i in tqdm(range(0, len(chunks), batch_size)):
     to_upsert = list(zip(ids_batch, embeds, meta_batch))
     # upsert to Pinecone
     index.upsert(vectors=to_upsert)
+    sleep(5)
