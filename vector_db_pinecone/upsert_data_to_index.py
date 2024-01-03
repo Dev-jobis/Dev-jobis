@@ -19,10 +19,10 @@ PINECONE_ENV = "gcp-starter"
 
 
 # S3FileLoader, S3DirectoryLoader
-datetiime_utc = "2023122607"  # example
+datetiime_file_prefix = "20240102"  # example
 loader = S3DirectoryLoader(
-    bucket="project-bucket-sessac",
-    prefix=f"logs/{datetiime_utc}",
+    bucket="project05-crawling",
+    prefix=f"job-data/{datetiime_file_prefix}",
     region_name="ap-northeast-2",
 )
 docs = loader.load()
