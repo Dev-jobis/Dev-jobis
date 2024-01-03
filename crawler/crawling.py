@@ -16,10 +16,8 @@ import json
 import logging
 from datetime import datetime
 import variables
-import schedule
-from threading import Thread
 from log_to_kafka import CustomLogger, kafka_log_producer
-from utils import URL_RANGE_value
+from utils import url_range_value, new_url_range_value
 
 logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
@@ -74,14 +72,7 @@ def get_jikmoo_list(page_source):
     else:
         return None
 
-        # 3. 개발 공고면 크롤링 해서 저장
 
-        companyname = soup.select(
-            "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
-            "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
-            "section.JobHeader_className__HttDA > div:nth-child(2) > "
-            "span.JobHeader_companyNameText__uuJyu > a"
-        )
 start_url_range = int(url_range_value)
 crawling_count = 0
 get_url_process = 200
@@ -205,7 +196,8 @@ while crawling_count < get_url_process:
                 extra_data={"url": url},
                 log_level=logging.WARNING,
             )
-        else:
+            continue
+        except requests.exceptions.RequestException as req_err:
             logger.send_json_log(
                 message=f"Request Error: {str(req_err)}",
                 timestamp=datetime.utcnow(),
@@ -226,6 +218,8 @@ while crawling_count < get_url_process:
         break
     start_url_range = end_url_range + 1
 
+    new_url_range_value = int(url_range_value)
+    url_range_value = new_url_range_value
 
     time.sleep(1)
     logger.send_json_log(
