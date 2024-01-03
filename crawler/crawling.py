@@ -72,6 +72,7 @@ for url in url_list:
         soup = bs(page_source, "html.parser")
         logger.send_json_log(
             message="crawling start.",
+            timestamp=datetime.utcnow(),
             extra_data={"url": url},
             log_level=logging.INFO,
         )
@@ -182,12 +183,14 @@ for url in url_list:
             time.sleep(0.1)
             logger.send_json_log(
                 message="crawling complete.",
+                timestamp=datetime.utcnow(),
                 extra_data={"url": url},
                 log_level=logging.INFO,
             )
         else:
             logger.send_json_log(
                 message="No Develop job.",
+                timestamp=datetime.utcnow(),
                 extra_data={"url": url},
                 log_level=logging.WARNING,
             )
@@ -196,6 +199,7 @@ for url in url_list:
     except requests.exceptions.HTTPError as http_err:
         logger.send_json_log(
             message="No Webpage.",
+            timestamp=datetime.utcnow(),
             extra_data={"url": url},
             log_level=logging.ERROR,
         )
@@ -203,6 +207,7 @@ for url in url_list:
     except requests.exceptions.RequestException as req_err:
         logger.send_json_log(
             message="Request Error.",
+            timestamp=datetime.utcnow(),
             extra_data={"url": url},
             log_level=logging.ERROR,
         )
@@ -210,6 +215,7 @@ for url in url_list:
     except Exception as e:
         logger.send_json_log(
             message="Exception Error.",
+            timestamp=datetime.utcnow(),
             extra_data={"url": url},
             log_level=logging.ERROR,
         )
@@ -218,6 +224,7 @@ for url in url_list:
 time.sleep(1)
 logger.send_json_log(
     message="crawling is Done.",
+    timestamp=datetime.utcnow(),
     log_level=logging.INFO,
 )
 driver.close()

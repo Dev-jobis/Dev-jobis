@@ -37,15 +37,15 @@ class CustomLogger:
     def send_json_log(
         self,
         message,
+        timestamp,
         log_level=None,
-        timestamp=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
         extra_data=None,
     ):
         if log_level is None:
             log_level = self.default_level
 
         log_data = {
-            "timestamp": timestamp,
+            "timestamp": timestamp.strftime("%Y-%m-%d %H:%M:%S.%f"),
             "level": logging.getLevelName(log_level),
             "message": message,
             "service_name": self.service_name,
