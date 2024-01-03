@@ -44,43 +44,7 @@ driver.execute_cdp_cmd(
     },
 )
 
-start_url_range = int(URL_RANGE_value)
-end_url_range = start_url_range + 3000
 
-
-def make_url_list(start, end):
-    url_list = []
-    for i in range(start, end):
-        url = f"https://www.wanted.co.kr/wd/{i}"
-        url_list.append(url)
-    return url_list
-
-
-url_list = make_url_list(start_url_range, end_url_range)
-
-for url in url_list:
-    try:
-        # 1. 접근 가능한 페이지인지 확인
-        response = requests.get(url)
-        response.raise_for_status()
-        driver.get(url)
-        WebDriverWait(driver, 20).until(
-            lambda driver: driver.execute_script("return document.readyState")
-            == "complete"
-        )
-        page_source = driver.page_source
-        soup = bs(page_source, "html.parser")
-        logger.send_json_log(
-            message="crawling start.",
-            timestamp=datetime.utcnow(),
-            extra_data={"url": url},
-            log_level=logging.INFO,
-        )
-        # 2. 개발 공고인지 확인
-        if (
-            '"occupationalCategory":' in page_source
-            and '"validThrough":' in page_source
-        ):
 def get_jikmoo_list(page_source):
     if '"occupationalCategory":' in page_source:
         if '"validThrough":' in page_source:
@@ -118,46 +82,73 @@ def get_jikmoo_list(page_source):
             "section.JobHeader_className__HttDA > div:nth-child(2) > "
             "span.JobHeader_companyNameText__uuJyu > a"
         )
+start_url_range = int(url_range_value)
+crawling_count = 0
+get_url_process = 200
 
-        if companyname:
-            data_company_name = companyname[0]["data-company-name"]
+while crawling_count < get_url_process:
+    end_url_range = start_url_range + 1
 
-        else:
-            continue
-
-        title = re.sub(r"\| 원티드", "", soup.title.text)
-        base_selector = (
-            "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
-            "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
-            "div.JobContent_descriptionWrapper__SM4UD > "
-            "section.JobDescription_JobDescription__VWfcb > p:nth-child({}) > {}"
-        )
-        workplace = soup.select_one(
-            "#__next > div.JobDetail_cn__WezJh > "
-            "div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > "
-            "div.JobContent_className___ca57 > section.JobHeader_className__HttDA > "
-            "div:nth-child(2) > span.JobHeader_pcLocationContainer__xRwIv"
-        )
-
-        companydescription = str(soup.select(base_selector.format(1, "span")))
-        mainbusiness = str(soup.select(base_selector.format(3, "span")))
-        qualifications = str(soup.select(base_selector.format(5, "span")))
-        preferential = str(soup.select(base_selector.format(7, "span")))
-        welfare = str(soup.select(base_selector.format(9, "span")))
-        technologystack_nonedit = str(soup.select(base_selector.format(11, "div")))
-        technologystack = re.sub(
-            r"<div.*?>(.*?)<\/div>", r"\1 ", technologystack_nonedit
-        )
-
-        if any(job in variables.job_titles for job in jikmoo_list):
-            cleaned_title = re.sub(
-                r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
+    for i in range(start_url_range, end_url_range):
+        url = f"https://www.wanted.co.kr/wd/{i}"
+        try:
+            # 1. 접근 가능한 페이지인지 확인
+            response = requests.get(url)
+            response.raise_for_status()
+            driver.get(url)
+            WebDriverWait(driver, 20).until(
+                lambda driver: driver.execute_script("return document.readyState")
+                == "complete"
             )
-            txt_file_directory = "txt_file_directory"
-            if not os.path.exists(txt_file_directory):
-                os.mkdir(txt_file_directory)
-            txt_file_path = os.path.join(
-                txt_file_directory, f"test_{cleaned_title}_{url.split('/')[-1]}.txt"
+            page_source = driver.page_source
+            soup = bs(page_source, "html.parser")
+            logger.send_json_log(
+                message="crawling start.",
+                timestamp=datetime.utcnow(),
+                extra_data={"url": url},
+                log_level=logging.INFO,
+            )
+
+            # 2. 개발 공고인지 확인
+
+            jikmoo_list = get_jikmoo_list(page_source)
+            # 3. 개발 공고면 크롤링 해서 저장
+
+            companyname = soup.select(
+                "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
+                "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
+                "section.JobHeader_className__HttDA > div:nth-child(2) > "
+                "span.JobHeader_companyNameText__uuJyu > a"
+            )
+
+            if companyname:
+                data_company_name = companyname[0]["data-company-name"]
+
+            else:
+                continue
+
+            title = re.sub(r"\| 원티드", "", soup.title.text)
+            base_selector = (
+                "#__next > div.JobDetail_cn__WezJh > div.JobDetail_contentWrapper__DQDB6 > "
+                "div.JobDetail_relativeWrapper__F9DT5 > div.JobContent_className___ca57 > "
+                "div.JobContent_descriptionWrapper__SM4UD > "
+                "section.JobDescription_JobDescription__VWfcb > p:nth-child({}) > {}"
+            )
+            workplace = soup.select_one(
+                "#__next > div.JobDetail_cn__WezJh > "
+                "div.JobDetail_contentWrapper__DQDB6 > div.JobDetail_relativeWrapper__F9DT5 > "
+                "div.JobContent_className___ca57 > section.JobHeader_className__HttDA > "
+                "div:nth-child(2) > span.JobHeader_pcLocationContainer__xRwIv"
+            )
+
+            companydescription = str(soup.select(base_selector.format(1, "span")))
+            mainbusiness = str(soup.select(base_selector.format(3, "span")))
+            qualifications = str(soup.select(base_selector.format(5, "span")))
+            preferential = str(soup.select(base_selector.format(7, "span")))
+            welfare = str(soup.select(base_selector.format(9, "span")))
+            technologystack_nonedit = str(soup.select(base_selector.format(11, "div")))
+            technologystack = re.sub(
+                r"<div.*?>(.*?)<\/div>", r"\1 ", technologystack_nonedit
             )
             print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
             with open(txt_file_path, "w", encoding="utf-8") as txt_file:
@@ -189,6 +180,25 @@ def get_jikmoo_list(page_source):
                 data = {combined_text_cleaned.replace("\n", " ")}
             kafka_log_producer.send("job-data", value=combined_text_cleaned)
             time.sleep(0.1)
+
+                kafka_log_producer.send("job-data", value=combined_text_cleaned)
+                time.sleep(0.1)
+                logger.send_json_log(
+                    message="crawling complete.",
+                    timestamp=datetime.utcnow(),
+                    extra_data={"url": url},
+                    log_level=logging.INFO,
+                )
+            else:
+                logger.send_json_log(
+                    message="No Develop job.",
+                    timestamp=datetime.utcnow(),
+                    extra_data={"url": url},
+                    log_level=logging.WARNING,
+                )
+                continue
+            crawling_count += 1
+        except requests.exceptions.HTTPError as http_err:
             logger.send_json_log(
                 message="crawling complete.",
                 timestamp=datetime.utcnow(),
@@ -202,37 +212,25 @@ def get_jikmoo_list(page_source):
                 extra_data={"url": url},
                 log_level=logging.WARNING,
             )
-            continue
+            break
+        except Exception as e:
+            logger.send_json_log(
+                message=f"Exception Error: {str(e)}",
+                timestamp=datetime.utcnow(),
+                extra_data={"url": url},
+                log_level=logging.ERROR,
+            )
+            break
 
-    except requests.exceptions.HTTPError as http_err:
-        logger.send_json_log(
-            message="No Webpage.",
-            timestamp=datetime.utcnow(),
-            extra_data={"url": url},
-            log_level=logging.ERROR,
-        )
-        continue
-    except requests.exceptions.RequestException as req_err:
-        logger.send_json_log(
-            message="Request Error.",
-            timestamp=datetime.utcnow(),
-            extra_data={"url": url},
-            log_level=logging.ERROR,
-        )
-        continue
-    except Exception as e:
-        logger.send_json_log(
-            message="Exception Error.",
-            timestamp=datetime.utcnow(),
-            extra_data={"url": url},
-            log_level=logging.ERROR,
-        )
-        continue
+    if crawling_count >= get_url_process:
+        break
+    start_url_range = end_url_range + 1
 
-time.sleep(1)
-logger.send_json_log(
-    message="crawling is Done.",
-    timestamp=datetime.utcnow(),
-    log_level=logging.INFO,
-)
-driver.close()
+
+    time.sleep(1)
+    logger.send_json_log(
+        message="crawling is Done.",
+        timestamp=datetime.utcnow(),
+        log_level=logging.INFO,
+    )
+driver.quit()
