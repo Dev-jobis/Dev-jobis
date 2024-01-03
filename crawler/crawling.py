@@ -81,31 +81,34 @@ for url in url_list:
             '"occupationalCategory":' in page_source
             and '"validThrough":' in page_source
         ):
+def get_jikmoo_list(page_source):
+    if '"occupationalCategory":' in page_source:
+        if '"validThrough":' in page_source:
             jikmoo = page_source[
                 page_source.find('"occupationalCategory":')
                 + 24 : page_source.find('"validThrough":')
                 - 2
             ]
-        elif (
-            '"occupationalCategory":' in page_source
-            and '"employmentType"' in page_source
-        ):
+        else:
             jikmoo = page_source[
                 page_source.find('"occupationalCategory":')
                 + 24 : page_source.find('"employmentType"')
                 - 2
             ]
-        elif '"sub_categories":' in page_source:
-            jikmoo = page_source[
-                page_source.find('"sub_categories":')
-                + 18 : page_source.find('],"position":')
-                - 1
-            ]
-        else:
-            continue
-
         jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
         time.sleep(1)
+        return jikmoo_list
+    elif '"sub_categories":' in page_source:
+        jikmoo = page_source[
+            page_source.find('"sub_categories":')
+            + 18 : page_source.find('],"position":')
+            - 1
+        ]
+        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
+        time.sleep(1)
+        return jikmoo_list
+    else:
+        return None
 
         # 3. 개발 공고면 크롤링 해서 저장
 
