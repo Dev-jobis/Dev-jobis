@@ -1,8 +1,18 @@
 import boto3
 
-s3 = boto3.client("s3")
+ssm = boto3.client("ssm", region_name="ap-northeast-2")
+parameter_name = "/SESAC/SLACK/SIGNING_SECRET"
+response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
+SLACK_SIGNING_SECRET = response["Parameter"]["Value"]
 
+parameter_name = "/SESAC/SLACK/BOT_TOKEN"
+response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
+SLACK_BOT_TOKEN = response["Parameter"]["Value"]
 
-def get_s3_object(bucket, key, is_string=False):
-    obj = s3.get_object(Bucket=bucket, Key=key)["Body"]  # byte object임에 유의할 것
-    return obj.read().decode("utf-8").rstrip() if is_string else obj
+parameter_name = "/SESAC/PINECONE/API_KEY"
+response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
+PINECONE_API_KEY = response["Parameter"]["Value"]
+
+parameter_name = "/SESAC/OPENAI/API_KEY"
+response = ssm.get_parameter(Name=parameter_name, WithDecryption=True)
+OPENAI_API_KEY = response["Parameter"]["Value"]

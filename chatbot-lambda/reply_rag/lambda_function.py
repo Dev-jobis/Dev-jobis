@@ -1,25 +1,21 @@
 import json
 from slack_bolt import App
 from rag import WantedChatBot
-from utils import get_s3_object
+from log_to_kafka import CustomLogger
+from utils import SLACK_SIGNING_SECRET, SLACK_BOT_TOKEN
 
-
-slack_bot_token = get_s3_object(
-    "project05-credentials", "slack_bot_token", is_string=True
-)  # TODO: parameter store로 대체
-slack_signing_secret = get_s3_object(
-    "project05-credentials", "slack_signing_secret", is_string=True
-)
 
 app = App(
-    token=slack_bot_token,  # bot user token
-    signing_secret=slack_signing_secret,
+    token=SLACK_BOT_TOKEN,  # bot user token
+    signing_secret=SLACK_SIGNING_SECRET,
 )
 slack_client = app.client
 
+logger = CustomLogger("lambda-slack-02")
+
 
 def lambda_handler(event, context):
-    print("EVENT : ", event)
+    logger.send_json_log("Start Lambda...")
     # TODO: logging - invoke 시 사용자 질문이 잘 넘어 왔는지, 누구로부터 넘어왔고, 언제 넘어왔고, 어떤 내용인지
     msg_info = event["event"]
 
@@ -37,20 +33,22 @@ def lambda_handler(event, context):
     they are finding.
     If the information can not be found in the information
     provided by the user you truthfully say "I don't know".
+    Your answer should be in Korean.
     """
     chatbot = WantedChatBot(index_name, questioner_message, primer, 3)
     response = chatbot.answer
-    blocks = [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": f"<@{questioner_user_id}>\n{response}",
-            },
-        }
-    ]
-    slack_client.chat_postMessage(channel=questioner_channel, text="", blocks=blocks)
-
-    # TODO: 메시지 보낸 시간을 사용자 쿼리 받은 시간과 비교(챗봇 응답 시간 단축)
-
+    ans = ""
+    i = 0
+    for res in response:
+        ans += res
+        i += 1
+        if i > 30 and ans[-1] in [" ", ",", ".", "\n"]:
+            slack_client.chat_postMessage(channel=questioner_channel, text=ans)
+            i = 0
+            ans = ""
+    if ans != "":
+        slack_client.chat_postMessage(
+            channel=questioner_channel, text=ans
+        )  # TODO: 마지막이 자연스럽게 나오려면?
+    logger.send_json_log("Chatbot Answering Done.")
     return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}
