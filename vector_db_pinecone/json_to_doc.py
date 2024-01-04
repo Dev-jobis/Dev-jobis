@@ -4,13 +4,6 @@ from langchain.schema import Document
 import tempfile
 
 
-s3_resource = boto3.resource("s3")
-s3_client = boto3.client("s3")
-bucket_name = "project05-crawling"
-prefix = "test_json"  # For test
-bucket = s3_resource.Bucket(bucket_name)
-
-
 def make_file_to_doc(file_path):
     """
     S3에서 다운로든 받은 파일을 파싱하여 Langchain Document로 만든다.
@@ -40,6 +33,10 @@ def S3_bucket_file_loader(bucket_name, prefix):
     """
     S3에서 임베딩할 파일들을 임시 디렉토리로 다운로드 받고, 해당 파일을 doc으로 만드는 과정을 포함한다.
     """
+    s3_resource = boto3.resource("s3")
+    s3_client = boto3.client("s3")
+    bucket = s3_resource.Bucket(bucket_name)
+
     docs = []
     with tempfile.TemporaryDirectory() as temp_dir:
         print("temporary directory : ", temp_dir)

@@ -144,8 +144,10 @@ def main():
 
     # 3. Text to Chunks
     bucket_name = "project05-crawling"
-    prefix = "test_json"  # For test
-    docs = json_to_doc(bucket_name, prefix)
+    prefix = "job-data/20240104"  # For test
+    # prefix = "test_json"  # For test
+
+    docs = json_to_doc.S3_bucket_file_loader(bucket_name, prefix)
     text_splitter = define_text_splitter()
     chunks = split_text_into_chunks(docs, text_splitter)
 
