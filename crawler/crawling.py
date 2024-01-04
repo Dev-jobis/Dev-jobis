@@ -147,33 +147,37 @@ while crawling_count < get_url_process:
                     r'[\\/*?:"<>]', "", re.sub(r"\| 원티드", "", str(data_company_name))
                 )
                 print(f"채용 공고 : {cleaned_title}/{url.split('/')[-1]}")
-                combined_text = (
-                    f"{title}\n"
-                    "직무 : "
-                    f"{jikmoo_list}\n"
-                    "근무지역 : "
-                    f"{workplace}\n"
-                    f"{companydescription}\n"
-                    "주요업무\n"
-                    f"{mainbusiness}\n"
-                    "자격요건\n"
-                    f"{qualifications}\n"
-                    "우대사항\n"
-                    f"{preferential}\n"
-                    "혜택 및 복지\n"
-                    f"{welfare}\n"
-                    "기술스택\n"
-                    f"{technologystack}\n"
+
+                combined_text = {
+                    "title": title,
+                    "url": url,
+                    "job_category": jikmoo_list,
+                    "workplace": workplace,
+                    "technology_stack": technologystack,
+                    "contents": {
+                        "companydescription": companydescription,
+                        "mainbusiness": mainbusiness,
+                        "qualifications": qualifications,
+                        "preferential": preferential,
+                        "welfare": welfare,
+                    },
+                }
+
+                combined_text_cleaned = json.dumps(combined_text, ensure_ascii=False)
+                combined_text_cleaned = re.sub(
+                    r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text_cleaned
                 )
                 combined_text_cleaned = re.sub(
-                    r"<div.*?>(.*?)<\/div>", r"\1 ", combined_text
+                    r"<.*?>|amp;|\[|\]|'| 원티드'|•", "", combined_text_cleaned
                 )
-                combined_text_cleaned = re.sub(
-                    r"<.*?>|amp;|\[|\]|'| 원티드'", "", combined_text_cleaned
+                combined_text_cleaned = re.sub('"', "", combined_text_cleaned)
+
+                kafka_log_producer.send(
+                    "job-data", value=combined_text_cleaned.encode("utf-8")
                 )
 
-                kafka_log_producer.send("job-data", value=combined_text_cleaned)
                 time.sleep(0.1)
+
                 logger.send_json_log(
                     message="crawling complete.",
                     timestamp=datetime.utcnow(),
