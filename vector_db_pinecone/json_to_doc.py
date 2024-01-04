@@ -41,7 +41,7 @@ def S3_bucket_file_loader(bucket_name, prefix):
     with tempfile.TemporaryDirectory() as temp_dir:
         print("temporary directory : ", temp_dir)
         for obj in bucket.objects.filter(Prefix=prefix):
-            file_path = f"{temp_dir}/{obj.key}"
+            file_path = f"{temp_dir}/{obj.key.split('/')[-1]}"  # TODO: object의 위치가 바뀌면... 덩달아 바뀌게 될 코드
             response = s3_client.download_file(
                 Bucket=bucket_name, Key=obj.key, Filename=file_path
             )
