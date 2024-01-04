@@ -2,14 +2,14 @@
 resource "aws_security_group" "kafka-cluster" {
   name        = "kafka-cluster"
   description = "Allow port for kafka-cluster"
-  vpc_id      = aws_vpc.terraform_vpc.id
+  vpc_id      = aws_vpc.ansible_vpc.id
 
   ingress {
     description      = "inter Zookeeper Port" # 주키퍼간 통신 포트
     from_port        = 3888
     to_port          = 3888
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
    ingress {
@@ -17,7 +17,7 @@ resource "aws_security_group" "kafka-cluster" {
     from_port        = 2888
     to_port          = 2888
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
 
@@ -26,7 +26,7 @@ resource "aws_security_group" "kafka-cluster" {
     from_port        = 2181
     to_port          = 2181
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
 
@@ -35,7 +35,7 @@ resource "aws_security_group" "kafka-cluster" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
  ingress {
@@ -43,7 +43,7 @@ resource "aws_security_group" "kafka-cluster" {
     from_port        = 9092
     to_port          = 9092
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
 ingress {
@@ -51,7 +51,7 @@ ingress {
     from_port        = 7071
     to_port          = 7071
     protocol         = "tcp"
-    cidr_blocks      = [aws_vpc.terraform_vpc.cidr_block]
+    cidr_blocks      = [aws_vpc.ansible_vpc.cidr_block]
   }
 
 

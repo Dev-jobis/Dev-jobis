@@ -2,7 +2,7 @@
 resource "aws_security_group" "bastion" {
   name = "bastion"
   description = "bastion"
-  vpc_id =  aws_vpc.terraform_vpc.id
+  vpc_id =  aws_vpc.ansible_vpc.id
 
 # SSH 허용
  ingress {

@@ -1,6 +1,6 @@
 # 배스천 호스트 생성
 resource "aws_instance" "bastion-host" {
-  ami = "ami-0f2061304b4ee7111"
+  ami = var.ec2_ami_id
   instance_type = var.ec2_instance_type
   key_name = "project0key"
   vpc_security_group_ids = [aws_security_group.bastion.id]
@@ -9,7 +9,13 @@ resource "aws_instance" "bastion-host" {
 #known_hosts 삭제
   user_data = <<-EOF
   #!/bin/bash
-  sudo rm -rf /home/ec2-user/.ssh/known_hosts
+  sudo dnf install python3.11 -y
+  sudo dnf install python3.11-pip -y
+  cd /usr/bin
+  ln -s /usr/bin/python3.11 python
+  python -m pip install --user ansible
+  mkdir ~/kafka
+  mkdir ~/promethus-grafana
   EOF
 
   tags = {

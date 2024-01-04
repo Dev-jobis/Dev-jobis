@@ -1,6 +1,6 @@
 # 프라이빗 서브넷 라우팅 테이블 생성
 resource "aws_route_table" "private_rt" {
-  vpc_id = aws_vpc.terraform_vpc.id
+  vpc_id = aws_vpc.ansible_vpc.id
 
   tags = {
     Name = "private_rt"

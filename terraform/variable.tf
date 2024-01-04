@@ -12,4 +12,7 @@ variable "role_name" {
   description = "role_name for fluentd and kafka-1"
   type = string
 }
-          
+variable "ec2_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
