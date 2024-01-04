@@ -11,12 +11,12 @@ logger = CustomLogger("lambda-slack-01")
 
 
 def lambda_handler(event, context):
-    logger.send_json_log(
-        message="Get Chatbot Query", extra_data=event, log_level=logging.INFO
-    )
-
     if "X-Slack-Signature" not in event["headers"]:
-        logger.send_json_log(message="Not from Slack", log_level=logging.WARNING)
+        logger.send_json_log(
+            message="Not from Slack",
+            log_level=logging.WARNING,
+            timestamp=datetime.utcnow(),
+        )
         return {
             "statusCode": 400,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
@@ -38,7 +38,11 @@ def lambda_handler(event, context):
     if abs(datetime.now().timestamp() - int(time_stamp)) > 60 * 5:
         # The request timestamp is more than five minutes from local time.
         # It could be a replay attack, so let's ignore it.
-        logger.send_json_log(message="Time Not Match.", log_level=logging.WARNING)
+        logger.send_json_log(
+            message="Time Not Match.",
+            log_level=logging.WARNING,
+            timestamp=datetime.utcnow(),
+        )
         return {
             "statusCode": 400,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
@@ -54,7 +58,12 @@ def lambda_handler(event, context):
     my_signature = "v0=" + hmac.new(byte_key, message, hashlib.sha256).hexdigest()
     x_slack_signature = event["headers"]["X-Slack-Signature"]
     if hmac.compare_digest(my_signature, x_slack_signature):
-        logger.send_json_log(message="Match.")
+        logger.send_json_log(
+            message="Chatbot Get Query",
+            log_level=logging.INFO,
+            timestamp=datetime.utcnow(),
+        )
+
         lambda_client = boto3.client("lambda")
         response = lambda_client.invoke(
             FunctionName="chat_to_slack",
@@ -63,7 +72,9 @@ def lambda_handler(event, context):
             ClientContext="frompythontest",
             Payload=bytes(request_body, "utf-8"),
         )
-        logger.send_json_log(message="Chatbot Lambda Invoke Done.")
+        logger.send_json_log(
+            message="Chatbot Lambda Invoke Done.", timestamp=datetime.utcnow()
+        )
         return {
             "statusCode": 200,
             "headers": {"Content-type": "application/json", "X-Slack-No-Retry": "1"},
