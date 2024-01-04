@@ -137,7 +137,7 @@ def main():
         )
 
     pinecone_index = pinecone.Index(index_name)
-    print(index.describe_index_stats())
+    print(pinecone_index.describe_index_stats())
 
     # 2. Connect to OpenAI
     openai_client = openai.OpenAI()
