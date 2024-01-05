@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+import time
 from slack_bolt import App
 from rag import WantedChatBot
 from log_to_kafka import CustomLogger
@@ -15,14 +17,13 @@ logger = CustomLogger("lambda-slack-02")
 
 
 def lambda_handler(event, context):
-    logger.send_json_log("Start Lambda...")
-    # TODO: logging - invoke 시 사용자 질문이 잘 넘어 왔는지, 누구로부터 넘어왔고, 언제 넘어왔고, 어떤 내용인지
+    logger.send_json_log("Start Lambda...", timestamp=datetime.utcnow())
     msg_info = event["event"]
 
     questioner_channel = msg_info.get("channel")
     questioner_message = msg_info.get("text")
     questioner_user_id = msg_info.get("user")
-    questioner_timestamp = msg_info.get("ts")
+    questioner_timestamp = int(event.get("event_time"))
 
     index_name = "test-metadata"
     primer = f"""
@@ -47,8 +48,14 @@ def lambda_handler(event, context):
             i = 0
             ans = ""
     if ans != "":
-        slack_client.chat_postMessage(
-            channel=questioner_channel, text=ans
-        )  # TODO: 마지막이 자연스럽게 나오려면?
-    logger.send_json_log("Chatbot Answering Done.")
+        slack_client.chat_postMessage(channel=questioner_channel, text=ans)
+    logger.send_json_log(
+        "Chatbot Answering Done.",
+        timestamp=datetime.utcnow(),
+        extra_data={
+            "duration_sec": time.time() - questioner_timestamp,
+            "user": questioner_user_id,
+            "query": questioner_message,
+        },
+    )
     return {"statusCode": 200, "body": json.dumps("Hello from Lambda!")}

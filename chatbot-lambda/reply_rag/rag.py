@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import time
 import openai
 import pinecone
 from utils import OPENAI_API_KEY, PINECONE_API_KEY
@@ -25,15 +26,20 @@ class WantedChatBot:
         self.answer = self.make_answer()  # generator
 
     def init_pinecone_index(self, index_name):
-        logger.send_json_log("pinecone init ...")
+        init_time = time.time()
         pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
         index_name = "test-metadata"
         index = pinecone.Index(index_name)
         print(index.describe_index_stats())
-        logger.send_json_log("pinecone init ... DONE")
+        logger.send_json_log(
+            "Pinecone INIT",
+            timestamp=datetime.utcnow(),
+            extra_data={"duration_sec": time.time() - init_time},
+        )
         return index
 
     def get_related_contexts(self):
+        init_time = time.time()
         query_to_vector = self.openai_client.embeddings.create(
             input=[self.query], model=self.embed_model
         )
@@ -41,7 +47,11 @@ class WantedChatBot:
         res = self.pinecone_index.query(xq, top_k=self.k, include_metadata=True)
         # similarity 가 특정 threshold 를 넘는 것만 뽑아와야 할텐데
         related_contexts = [item["metadata"]["text"] for item in res["matches"]]
-        logger.send_json_log(message="related context is ready.")
+        logger.send_json_log(
+            message="Related context is ready.",
+            timestamp=datetime.utcnow(),
+            extra_data={"duration_sec": time.time() - init_time},
+        )
         return related_contexts
 
     def make_augmented_query(self):
@@ -51,7 +61,8 @@ class WantedChatBot:
         return augmented_query
 
     def make_answer(self):
-        logger.send_json_log("start making answer ... ")
+        init_time = time.time()
+        logger.send_json_log("start making answer ... ", timestamp=datetime.utcnow())
         stream = self.openai_client.chat.completions.create(
             model="gpt-3.5-turbo-1106",
             messages=[
@@ -59,9 +70,13 @@ class WantedChatBot:
                 {"role": "user", "content": self.augmented_query},
             ],
             stop="4",
-            temperature=0,
+            temperature=0,  # TODO: 수정 필요
             stream=True,
         )
-        logger.send_json_log("answer is ready")
+        logger.send_json_log(
+            "Answer is ready.",
+            timestamp=datetime.utcnow(),
+            extra_data={"duration_sec": time.time() - init_time},
+        )
         for chunk in stream:
             yield chunk.choices[0].delta.content or ""
