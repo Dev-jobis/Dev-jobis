@@ -4,7 +4,7 @@ import logging
 import time
 from kafka import KafkaProducer
 
-TOPIC = "chatbot-test"  # 이 부분 수정하여 사용
+TOPIC = "chatbot-log"  # 이 부분 수정하여 사용
 kafka_log_producer = KafkaProducer(
     bootstrap_servers=[
         "175.0.0.139:9092",  # TODO: parameter store로 대체
