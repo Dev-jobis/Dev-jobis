@@ -171,7 +171,7 @@ def crawling_post(url):
     qualifications_refined = [cleaning_bs_Tag(x) for x in qualifications]
     preferential_refined = [cleaning_bs_Tag(x) for x in preferential]
     welfare_refined = [cleaning_bs_Tag(x) for x in welfare]
-    technology_stack_refined = [cleaning_bs_Tag(x) for x in technology_stack_str]
+    technology_stack_refined = cleaning_bs_Tag(technology_stack_str)
 
     # json dumps
     combined_text = {
