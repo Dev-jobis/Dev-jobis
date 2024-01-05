@@ -1,13 +1,17 @@
 import os
+import logging
 from time import sleep
+from datetime import datetime
 import pinecone
 import openai
 import tiktoken
 from tqdm.auto import tqdm
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import json_to_doc
+from log_to_kafka import CustomLogger
 from utils import OPENAI_API_KEY, PINECONE_API_KEY
 
+logger = CustomLogger("embedding", default_level=logging.INFO)
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
@@ -123,7 +127,7 @@ def main():
     index_name = "test-metadata"
     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
 
-    if pinecone.list_indexes():  # 인덱스를 하나밖에 못 만들기 때문에 기존 인덱스가 있다면 지운다.
+    if pinecone.list_indexes():  # 인덱스를 하나밖에 못 만들기 때문에 기존 인덱스가 있다면 지운다. TODO: 옵션으로 수정
         for index in pinecone.list_indexes():
             pinecone.delete_index(index)
             print("delete index Done", index)
@@ -144,7 +148,7 @@ def main():
 
     # 3. Text to Chunks
     bucket_name = "project05-crawling"
-    prefix = "job-data/20240104"  # For test
+    prefix = "job-data/20240105"  # For test
     # prefix = "test_json"  # For test
 
     docs = json_to_doc.S3_bucket_file_loader(bucket_name, prefix)
@@ -158,6 +162,12 @@ def main():
         openai_client=openai_client,
         embed_model="text-embedding-ada-002",
         batch_size=100,
+    )
+    logger.send_json_log(
+        message="Pinecone Index Upsert Done.",
+        log_level=logging.INFO,
+        timestamp=datetime.utcnow(),
+        extra_data={"docs_count": len(docs), "last_url": docs[-1].metadata["url"]},
     )
 
 
