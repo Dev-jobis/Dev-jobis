@@ -170,6 +170,10 @@ def crawling_post(url):
     technology_stack = get_post_details(soup, 11, "div")  # ResultSet, list / 없는 경우 있음
 
     # 전처리
+    technology_stack_str = re.sub(
+        r"<div.*?>(.*?)<\/div>", r"\1 ", str(technology_stack)
+    )  # 기술 스택만 조금 다르게 처리 필요
+
     title_refined = re.sub(r"[|\[\]원티드]", "", title).strip()
     location_refined = location.get_text()  # 서울.한국
     company_description_refined = [cleaning_bs_Tag(x) for x in company_description]
@@ -177,7 +181,7 @@ def crawling_post(url):
     qualifications_refined = [cleaning_bs_Tag(x) for x in qualifications]
     preferential_refined = [cleaning_bs_Tag(x) for x in preferential]
     welfare_refined = [cleaning_bs_Tag(x) for x in welfare]
-    technology_stack_refined = [cleaning_bs_Tag(x) for x in technology_stack]
+    technology_stack_refined = [cleaning_bs_Tag(x) for x in technology_stack_str]
 
     # json dumps
     combined_text = {
