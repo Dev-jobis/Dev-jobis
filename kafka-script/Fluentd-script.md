@@ -26,7 +26,7 @@ Fluentd 설치
 
 # fluentd 다운로드 및 설치
 
-	$ curl -fsSL https://toolbelt.treasuredata.com/sh/install-redhat-fluent-package5-lts.sh | sh
+	$ curl -fsSL https://toolbelt.treasuredata.com/sh/install-amazon2023-fluent-package5-lts.sh | sh
 	fluentd 환경설정
 
 	$ sudo vi /etc/fluent/fluentd.conf

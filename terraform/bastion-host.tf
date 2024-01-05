@@ -14,8 +14,6 @@ resource "aws_instance" "bastion-host" {
   cd /usr/bin
   ln -s /usr/bin/python3.11 python
   python -m pip install --user ansible
-  mkdir ~/kafka
-  mkdir ~/promethus-grafana
   EOF
 
   tags = {

@@ -1,0 +1,4 @@
+prometheus_db_dir: /var/lib/prometheus
+prometheus_version: 2.30.3
+prometheus_ip: 175.0.0.46
+prometheus_binary_install_dir: '/usr/local/bin'

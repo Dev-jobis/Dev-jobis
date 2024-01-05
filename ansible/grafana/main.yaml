@@ -1,0 +1,23 @@
+
+---
+- name: install grafana
+  become: yes
+  hosts: grafana
+  tasks:
+  - name: download grafana
+    get_url:
+     url: https://dl.grafana.com/oss/release/grafana-7.1.0-1.x86_64.rpm
+     dest: /home/ec2-user
+  - name: rpm key download
+    rpm_key:
+      state: present
+      key: https://grafanarel.s3.amazonaws.com/RPM-GPG-KEY-grafana
+  - name: install grafana
+    yum:
+      name: /home/ec2-user/grafana-7.1.0-1.x86_64.rpm
+      state: present
+  - name: start grafana
+    service:
+      name: grafana-server
+      state: started
+      enabled: yes
