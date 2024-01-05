@@ -215,6 +215,7 @@ def main():
     print("start here", url_list[0])
     for url in url_list:
         crawling_post(url)
+        time.sleep(2)
     print("end here", url)
 
     # parameter update
