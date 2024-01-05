@@ -1,0 +1,7 @@
+boto3
+openai==1.3.9
+tiktoken
+pinecone-client==2.2.4
+langchain==0.0.352
+langchain-community
+kafka-python==2.0.2
