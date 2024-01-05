@@ -165,7 +165,7 @@ def crawling_post(url):
         )
         return
 
-    # unrefined data ...
+    # get unrefined data ...
     soup = bs(page_source, "html.parser")
 
     title = make_title(soup)
@@ -176,13 +176,12 @@ def crawling_post(url):
     welfare = get_post_details(soup, 9, "span")  #  ResultSet, list
     technology_stack = get_post_details(soup, 11, "div")  # ResultSet, list / 없는 경우 있음
 
-    # 전처리
+    # refine data ...
     technology_stack_str = re.sub(
         r"<div.*?>(.*?)<\/div>", r"\1 ", str(technology_stack)
     )  # 기술 스택만 조금 다르게 처리 필요
-
     title_refined = re.sub(r"[|\[\]원티드]", "", title).strip()
-    location_refined = make_location(soup)  # 서울.한국 # TODO: None인 경우 처리
+    location_refined = make_location(soup)
     company_description_refined = [cleaning_bs_Tag(x) for x in company_description]
     main_business_refined = [cleaning_bs_Tag(x) for x in main_business]
     qualifications_refined = [cleaning_bs_Tag(x) for x in qualifications]
