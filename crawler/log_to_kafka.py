@@ -4,7 +4,7 @@ import logging
 import time
 from kafka import KafkaProducer
 
-TOPIC = "crawling-log-test"
+LOGGER_TOPIC = "crawler-log"
 kafka_log_producer = KafkaProducer(
     bootstrap_servers=[
         "175.0.0.139:9092",  # TODO: parameter store로 대체
@@ -18,7 +18,7 @@ kafka_log_producer = KafkaProducer(
 class KafkaHandler(logging.Handler):
     def emit(self, record):
         log_data = self.format(record)
-        kafka_log_producer.send(TOPIC, value=log_data)
+        kafka_log_producer.send(LOGGER_TOPIC, value=log_data)
         time.sleep(0.1)
 
 

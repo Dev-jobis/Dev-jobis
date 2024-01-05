@@ -193,8 +193,8 @@ def crawling_post(url):
         + welfare_refined,
     }
     combined_text_json = json.dumps(combined_text, ensure_ascii=False)
-    print("combined_text_json : ", combined_text_json)
-    kafka_log_producer.send("job-data", value=combined_text_json)
+    # print("combined_text_json : ", combined_text_json)
+    kafka_log_producer.send("crawler-job-data", value=combined_text_json)
     logger.send_json_log(
         message="crawling complete.",
         timestamp=datetime.utcnow(),
