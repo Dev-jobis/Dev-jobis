@@ -71,10 +71,11 @@ def get_job_list(page_source):
         return None
 
 
-def cleaning_bs_Tag(tag_data):
-    assert type(tag_data) == Tag
-    text = tag_data.get_text()
-    # re.sub(r"<div.*?>(.*?)<\/div>", r"\1 ", data)
+def cleaning_bs_Tag(text):
+    if type(text) == Tag:
+        text = text.get_text()
+    assert type(text) == str
+    # text = re.sub(r"<div.*?>(.*?)<\/div>", r"\1 ", text)
     text = re.sub("“|”|'", "", text)  # json 처리
     text = re.sub(r"<.*?>|amp;|-|\[|\]|▪|▶|'| 원티드'|•|●|#|※|■", " ", text)
     return text.strip()
