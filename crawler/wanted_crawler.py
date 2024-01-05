@@ -92,7 +92,7 @@ def check_response(url):
     response = requests.get(url)
     # response.raise_for_status()
     if response.status_code != 200:
-        print("Http Error. No Webpage.")
+        print(f"Http Error. No Webpage. {url}")
         return False
     return True
 
@@ -126,12 +126,12 @@ job_description_selector = (
 # base_selector.format(1, "span") -> 이거는 {} 안에 넣는 fstring
 
 
-def main():
-    ### start ###
-    url = f"https://www.wanted.co.kr/wd/198129"
-
+def crawling_post(url):
+    """
+    한 개의 url에 대해서 크롤링
+    """
     if not check_response(url):
-        pass
+        return
 
     driver.get(url)
     WebDriverWait(driver, 20).until(
@@ -140,7 +140,8 @@ def main():
     page_source = driver.page_source
 
     if not check_if_developer_job(page_source):
-        pass
+        print(f"Not Developer's Job. {url}")
+        return
 
     # unrefined data ...
     soup = bs(page_source, "html.parser")
@@ -181,6 +182,23 @@ def main():
     }
     combined_text_json = json.dumps(combined_text, ensure_ascii=False)
     print("combined_text_json : ", combined_text_json)
+    return
+
+
+def main():
+    wanted_post_base_url = "https://www.wanted.co.kr/wd/"
+    url_list = [
+        f"{wanted_post_base_url}{i}"
+        for i in range(START_URL_NUMBER, START_URL_NUMBER + URL_RANGE)
+    ]
+
+    print("start here", url_list[0])
+    for url in url_list:
+        crawling_post(url)
+    print("end here", url)
+
+    # parameter update
+    update_start_url_number(str(START_URL_NUMBER + URL_RANGE))
     return
 
 
