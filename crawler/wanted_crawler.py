@@ -43,30 +43,30 @@ driver.execute_cdp_cmd(
 )
 
 
-def get_jikmoo_list(page_source):
+def get_job_list(page_source):
     if '"occupationalCategory":' in page_source:
         if '"validThrough":' in page_source:
-            jikmoo = page_source[
+            job = page_source[
                 page_source.find('"occupationalCategory":')
                 + 24 : page_source.find('"validThrough":')
                 - 2
             ]
         else:
-            jikmoo = page_source[
+            job = page_source[
                 page_source.find('"occupationalCategory":')
                 + 24 : page_source.find('"employmentType"')
                 - 2
             ]
-        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
-        return jikmoo_list
+        job_list = [item.lstrip().replace('"', "") for item in job.split(",")]
+        return job_list
     elif '"sub_categories":' in page_source:
-        jikmoo = page_source[
+        job = page_source[
             page_source.find('"sub_categories":')
             + 18 : page_source.find('],"position":')
             - 1
         ]
-        jikmoo_list = [item.lstrip().replace('"', "") for item in jikmoo.split(",")]
-        return jikmoo_list
+        job_list = [item.lstrip().replace('"', "") for item in job.split(",")]
+        return job_list
     else:
         return None
 
@@ -106,8 +106,8 @@ def check_response(url):
 
 
 def check_if_developer_job(page_source):
-    jikmoo_list = get_jikmoo_list(page_source)
-    if any(job in variables.job_titles for job in jikmoo_list):
+    job_list = get_job_list(page_source)
+    if (job_list is not None) and any(job in variables.job_titles for job in job_list):
         return True
     return False
 
@@ -183,7 +183,7 @@ def crawling_post(url):
     combined_text = {
         "title": title_refined,
         "url": url,
-        "job_category": get_jikmoo_list(page_source),
+        "job_category": get_job_list(page_source),
         "location": location_refined,
         "technology_stack": technology_stack_refined,
         "contents": company_description_refined
