@@ -16,7 +16,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
 import variables
-from utils import url_range_value, new_url_range_value, repeatnumber
+from utils import START_URL_NUMBER, URL_RANGE, update_start_url_number
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
