@@ -51,5 +51,5 @@ class CustomLogger:
             "service_name": self.service_name,
             "extra_data": extra_data,
         }
-        json_log_data = json.dumps(log_data)
+        json_log_data = json.dumps(log_data, ensure_ascii=False)
         self.logger.log(log_level, json_log_data)
