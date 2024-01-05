@@ -72,6 +72,8 @@ def get_job_list(page_source):
 
 
 def cleaning_bs_Tag(text):
+    if text is None:
+        return None
     if type(text) == Tag:
         text = text.get_text()
     assert type(text) == str
@@ -105,7 +107,25 @@ def check_if_developer_job(page_source):
 def get_post_details(soup, idx, tag):
     selector = base_selector + job_content_wrapper_selector + job_description_selector
     res = soup.select(selector.format(idx, tag))
+    if res is None:
+        return None
     return res
+
+
+def make_location(soup):
+    location = soup.select_one(
+        base_selector + job_header_selector + job_header_location_selector
+    )  # type: bs4.element.Tag
+    if location is None:
+        return None
+    return location.get_text()
+
+
+def make_title(soup):
+    title = soup.title
+    if title is None:
+        return None
+    return title.get_text()
 
 
 base_selector = (
@@ -148,10 +168,7 @@ def crawling_post(url):
     # unrefined data ...
     soup = bs(page_source, "html.parser")
 
-    title = soup.title.get_text()
-    location = soup.select_one(
-        base_selector + job_header_selector + job_header_location_selector
-    )  # type: bs4.element.Tag
+    title = make_title(soup)
     company_description = get_post_details(soup, 1, "span")  # ResultSet, list
     main_business = get_post_details(soup, 3, "span")  # ResultSet, list
     qualifications = get_post_details(soup, 5, "span")  # ResultSet, list
@@ -165,13 +182,13 @@ def crawling_post(url):
     )  # 기술 스택만 조금 다르게 처리 필요
 
     title_refined = re.sub(r"[|\[\]원티드]", "", title).strip()
-    location_refined = location.get_text()  # 서울.한국
+    location_refined = make_location(soup)  # 서울.한국 # TODO: None인 경우 처리
     company_description_refined = [cleaning_bs_Tag(x) for x in company_description]
     main_business_refined = [cleaning_bs_Tag(x) for x in main_business]
     qualifications_refined = [cleaning_bs_Tag(x) for x in qualifications]
     preferential_refined = [cleaning_bs_Tag(x) for x in preferential]
     welfare_refined = [cleaning_bs_Tag(x) for x in welfare]
-    technology_stack_refined = cleaning_bs_Tag(technology_stack_str)
+    technology_stack_refined = [cleaning_bs_Tag(technology_stack_str)]
 
     # json dumps
     combined_text = {
