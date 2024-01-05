@@ -4,7 +4,7 @@ import logging
 import time
 from kafka import KafkaProducer
 
-TOPIC = "chatbot-test"  # 이 부분 수정하여 사용
+TOPIC = "chatbot-log"  # 이 부분 수정하여 사용
 kafka_log_producer = KafkaProducer(
     bootstrap_servers=[
         "175.0.0.139:9092",  # TODO: parameter store로 대체
@@ -51,5 +51,5 @@ class CustomLogger:
             "service_name": self.service_name,
             "extra_data": extra_data,
         }
-        json_log_data = json.dumps(log_data)
+        json_log_data = json.dumps(log_data, ensure_ascii=False)
         self.logger.log(log_level, json_log_data)
