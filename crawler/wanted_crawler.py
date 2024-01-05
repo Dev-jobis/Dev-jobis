@@ -198,7 +198,7 @@ def crawling_post(url):
     logger.send_json_log(
         message="crawling complete.",
         timestamp=datetime.utcnow(),
-        extra_data=combined_text_json,
+        extra_data=combined_text,
         log_level=logging.INFO,
     )
     return
