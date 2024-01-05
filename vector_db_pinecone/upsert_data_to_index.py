@@ -46,7 +46,7 @@ def split_text_into_chunks(docs, text_splitter):
             "title": line_dict["title"],
             "url": line_dict["url"],
             "job_category": line_dict["job_category"],
-            "workplace": line_dict["workplace"],
+            "location": line_dict["location"],
             "technology_stack": line_dict["technology_stack"],
         }
     )
@@ -64,7 +64,7 @@ def split_text_into_chunks(docs, text_splitter):
                         "id": f"{doc.metadata['url']}_{i}",
                         "text": texts[i],
                         "job_category": doc.metadata["job_category"],
-                        "workplace": doc.metadata["workplace"],
+                        "location": doc.metadata["location"],
                         "technology_stack": doc.metadata["technology_stack"],
                     }
                 ]
@@ -111,7 +111,7 @@ def upsert_chunks_to_index(
             {
                 "text": x["text"],
                 "job_category": x["job_category"],
-                "workplace": x["workplace"],
+                "location": x["location"],
                 "technology_stack": x["technology_stack"],
             }
             for x in meta_batch
@@ -148,7 +148,7 @@ def main():
 
     # 3. Text to Chunks
     bucket_name = "project05-crawling"
-    prefix = "job-data/20240105"  # For test
+    prefix = "job-data/2024010510"  # For test
     # prefix = "test_json"  # For test
 
     docs = json_to_doc.S3_bucket_file_loader(bucket_name, prefix)

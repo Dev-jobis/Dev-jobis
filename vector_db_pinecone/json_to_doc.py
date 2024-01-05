@@ -22,7 +22,7 @@ def make_file_to_doc(file_path):
                     "title": line_dict["title"],
                     "url": line_dict["url"],
                     "job_category": line_dict["job_category"],
-                    "workplace": line_dict["workplace"],
+                    "location": line_dict["location"],
                     "technology_stack": line_dict["technology_stack"],
                 },
             )
