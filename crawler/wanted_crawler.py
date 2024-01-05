@@ -16,7 +16,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
 import variables
+from log_to_kafka import CustomLogger, kafka_log_producer
 from utils import START_URL_NUMBER, URL_RANGE, update_start_url_number
+
+logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
 chrome_options = Options()
 chrome_options.add_argument("--headless")
@@ -91,8 +94,13 @@ def combined_text_company_address(data):
 def check_response(url):
     response = requests.get(url)
     # response.raise_for_status()
-    if response.status_code != 200:
-        print(f"Http Error. No Webpage. {url}")
+    if response.status_code != 200:  # TODO: logger가 붙는 곳이 일관성이 없음
+        logger.send_json_log(
+            message=f"URL Request {response.status_code}",
+            timestamp=datetime.utcnow(),
+            extra_data={"url": url, "code": response.status_code},
+            log_level=logging.WARNING,
+        )
         return False
     return True
 
@@ -101,7 +109,6 @@ def check_if_developer_job(page_source):
     jikmoo_list = get_jikmoo_list(page_source)
     if any(job in variables.job_titles for job in jikmoo_list):
         return True
-    print("Not developer Jobs.")
     return False
 
 
@@ -140,7 +147,12 @@ def crawling_post(url):
     page_source = driver.page_source
 
     if not check_if_developer_job(page_source):
-        print(f"Not Developer's Job. {url}")
+        logger.send_json_log(
+            message=f"Not Developer's job post.",
+            timestamp=datetime.utcnow(),
+            extra_data={"url": url},
+            log_level=logging.WARNING,
+        )
         return
 
     # unrefined data ...
@@ -182,10 +194,18 @@ def crawling_post(url):
     }
     combined_text_json = json.dumps(combined_text, ensure_ascii=False)
     print("combined_text_json : ", combined_text_json)
+    kafka_log_producer.send("job-data", value=combined_text_json)
+    logger.send_json_log(
+        message="crawling complete.",
+        timestamp=datetime.utcnow(),
+        extra_data=combined_text_json,
+        log_level=logging.INFO,
+    )
     return
 
 
 def main():
+    start_time = time.time()
     wanted_post_base_url = "https://www.wanted.co.kr/wd/"
     url_list = [
         f"{wanted_post_base_url}{i}"
@@ -199,6 +219,13 @@ def main():
 
     # parameter update
     update_start_url_number(str(START_URL_NUMBER + URL_RANGE))
+    end_time = time.time()
+    logger.send_json_log(
+        message=f"All crawling Done. ",
+        timestamp=datetime.utcnow(),
+        extra_data={"duration_sec": end_time - start_time},
+        log_level=logging.INFO,
+    )
     return
 
 
