@@ -80,17 +80,6 @@ def cleaning_bs_Tag(tag_data):
     return text.strip()
 
 
-def combined_text_company_address(data):
-    if isinstance(data, Tag):
-        data = str(data)
-    combined_text_delete_tag = re.sub(r"<div.*?>(.*?)<\/div>", r"\1 ", data)
-    combined_text = re.sub(
-        r"<.*?>|amp;|-|\[|\]|▪|▶|'| 원티드'|•|●|#|※|■", " ", combined_text_delete_tag
-    )
-    combined_text = re.sub("“|”", " ", combined_text)
-    return combined_text
-
-
 def check_response(url):
     response = requests.get(url)
     # response.raise_for_status()
