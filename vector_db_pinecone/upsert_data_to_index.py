@@ -156,6 +156,13 @@ def main():
 
     # 2. Connect to OpenAI
     openai_client = openai.OpenAI()
+def make_today_prefix():
+    """
+    해당 일에 크롤러가 올린 모든 공고를 pinecone에 벡터 임베딩 하도록 한다.
+    S3에 올라오는 채용공고 크롤링 데이터의 파일명은 utc 기준이다.
+    TODO: 임베딩 시에도 채용 공고 중복이 되지 않도록 해 주는 로직 필요
+    """
+    return datetime.utcnow().strftime("%Y%m%d")
 
     # 3. Text to Chunks
     bucket_name = "project05-crawling"
