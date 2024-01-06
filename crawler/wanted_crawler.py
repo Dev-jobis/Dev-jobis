@@ -233,7 +233,7 @@ def main():
 
     print("start here", url_list[0])
     for base_url, url_number in url_list:
-        # 이미 크롤링 한 url인지 확인한다.
+        # 이미 크롤링 한 url인지 확인한다. TODO: 크롤링 코드 안에 dynamodb와 연동되는 부분을 일관성있는 위치에 넣어야 함.
         if utils.check_url_in_dynamo_wanted_url(
             base_url=wanted_post_base_url, url_number=url_number
         ):
