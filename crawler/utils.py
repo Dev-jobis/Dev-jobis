@@ -6,7 +6,7 @@ dynamo_table = dynamodb.Table("wanted_url")
 
 parameter_name = "/SESAC/URL/RANGE"
 response = ssm.get_parameter(Name=parameter_name, WithDecryption=False)
-URL_RANGE = 20  # int(response["Parameter"]["Value"])  # 3000
+URL_RANGE = int(response["Parameter"]["Value"])  # batch: 3000
 
 
 def put_url_to_dynamo_wanted_url(base_url: str, url_number: int):
