@@ -237,7 +237,8 @@ def main():
         if utils.check_url_in_dynamo_wanted_url(
             base_url=wanted_post_base_url, url_number=url_number
         ):
-            crawling_post(base_url, url_number)
+            continue
+        crawling_post(base_url, url_number)
         time.sleep(2)
     print("end here", url_list[-1])
 
