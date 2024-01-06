@@ -132,54 +132,73 @@ def upsert_chunks_to_index(
         sleep(5)
 
 
+def make_today_prefix():
+    """
+    해당 일에 크롤러가 올린 모든 공고를 pinecone에 벡터 임베딩 하도록 한다.
+    S3에 올라오는 채용공고 크롤링 데이터의 파일명은 utc 기준이다.
+    TODO: 임베딩 시에도 채용 공고 중복이 되지 않도록 해 주는 로직 필요
+    """
+    return datetime.utcnow().strftime("%Y%m%d")
+
+
 def main():
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
 
-    # 1. Pinecone Init
-    index_name = "test-metadata"
-    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
-    if args.delete_index:  # delete=True
-        for index in pinecone.list_indexes():
-            pinecone.delete_index(index)
-            print("delete index Done", index)
+        # 1. Pinecone Init
+        index_name = "test-metadata"
+        pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
+        if args.delete_index:  # delete=True
+            for index in pinecone.list_indexes():
+                pinecone.delete_index(index)
+                print("delete index Done", index)
 
-    if index_name not in pinecone.list_indexes():
-        pinecone.create_index(
-            name=index_name,
-            dimension=1536,  # openAIEmbeddings의 dimension 크기 1536
-            # metric='cosine'
-            metric="dotproduct",
+        if index_name not in pinecone.list_indexes():
+            pinecone.create_index(
+                name=index_name,
+                dimension=1536,  # openAIEmbeddings의 dimension 크기 1536
+                # metric='cosine'
+                metric="dotproduct",
+            )
+
+        pinecone_index = pinecone.Index(index_name)
+        print(pinecone_index.describe_index_stats())
+
+        # 2. Connect to OpenAI
+        openai_client = openai.OpenAI()
+
+        # 3. Text to Chunks
+        bucket_name = "project05-crawling"
+        date_prefix = make_today_prefix()
+        prefix = f"job-data/{date_prefix}"
+        print("PREFIX : ", prefix)
+        # prefix = "job-data/2024010510"  # For test
+        # prefix = "test_json"  # For test
+
+        docs = json_to_doc.S3_bucket_file_loader(bucket_name, prefix)
+        text_splitter = define_text_splitter()
+        chunks = split_text_into_chunks(docs, text_splitter)
+
+        # 4. Upsert to Pinecone
+        upsert_chunks_to_index(
+            pinecone_index,
+            chunks,
+            openai_client=openai_client,
+            embed_model="text-embedding-ada-002",
+            batch_size=100,
         )
-
-    pinecone_index = pinecone.Index(index_name)
-    print(pinecone_index.describe_index_stats())
-
-    # 2. Connect to OpenAI
-    openai_client = openai.OpenAI()
-
-    # 3. Text to Chunks
-    bucket_name = "project05-crawling"
-    prefix = "job-data/2024010510"  # For test
-    # prefix = "test_json"  # For test
-
-    docs = json_to_doc.S3_bucket_file_loader(bucket_name, prefix)
-    text_splitter = define_text_splitter()
-    chunks = split_text_into_chunks(docs, text_splitter)
-
-    # 4. Upsert to Pinecone
-    upsert_chunks_to_index(
-        pinecone_index,
-        chunks,
-        openai_client=openai_client,
-        embed_model="text-embedding-ada-002",
-        batch_size=100,
-    )
-    logger.send_json_log(
-        message="Pinecone Index Upsert Done.",
-        log_level=logging.INFO,
-        timestamp=datetime.utcnow(),
-        extra_data={"docs_count": len(docs), "last_url": docs[-1].metadata["url"]},
-    )
+        logger.send_json_log(
+            message="Pinecone Index Upsert Done.",
+            log_level=logging.INFO,
+            timestamp=datetime.utcnow(),
+            extra_data={"docs_count": len(docs), "last_url": docs[-1].metadata["url"]},
+        )
+    except Exception as e:
+        logger.send_json_log(
+            message=f"Error during upsert.{e}",
+            log_level=logging.ERROR,
+            timestamp=datetime.utcnow(),
+        )
 
 
 if __name__ == "__main__":

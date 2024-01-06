@@ -33,17 +33,16 @@ def S3_bucket_file_loader(bucket_name, prefix):
     """
     S3에서 임베딩할 파일들을 임시 디렉토리로 다운로드 받고, 해당 파일을 doc으로 만드는 과정을 포함한다.
     """
-    s3_resource = boto3.resource("s3")
     s3_client = boto3.client("s3")
-    bucket = s3_resource.Bucket(bucket_name)
-
     docs = []
     with tempfile.TemporaryDirectory() as temp_dir:
         print("temporary directory : ", temp_dir)
-        for obj in bucket.objects.filter(Prefix=prefix):
-            file_path = f"{temp_dir}/{obj.key.split('/')[-1]}"  # TODO: object의 위치가 바뀌면... 덩달아 바뀌게 될 코드
+        response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+        print(response)
+        for content in response["Contents"]:
+            file_path = f"{temp_dir}/{content['Key'].split('/')[-1]}"  # TODO: object의 위치가 바뀌면... 덩달아 바뀌게 될 코드
             response = s3_client.download_file(
-                Bucket=bucket_name, Key=obj.key, Filename=file_path
+                Bucket=bucket_name, Key=content["Key"], Filename=file_path
             )
             doc_generator = make_file_to_doc(file_path)
             for doc in doc_generator:
