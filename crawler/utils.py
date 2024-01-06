@@ -13,6 +13,7 @@ def put_url_to_dynamo_wanted_url(base_url: str, url_number: int):
     response = dynamo_table.put_item(
         Item={"base_url": base_url, "url_number": url_number}
     )
+    print("put url finish", response)
     return response
 
 
@@ -20,7 +21,8 @@ def check_url_in_dynamo_wanted_url(base_url: str, url_number: int):
     response = dynamo_table.get_item(
         Key={"base_url": base_url, "url_number": url_number}
     )
-    if response["Items"]:
+    if response.get("Item"):
+        print("already crawled", url_number)
         return True
     else:
         return False
@@ -39,8 +41,9 @@ def get_max_url_from_dynamo_wanted_url():
         ScanIndexForward=False,  # 내림차순 정렬
         Limit=1,  # 최대값만 반환
     )
-    if response["Items"]:
-        max_item = response["Items"][0]
-        return int(max_item["url_number"])
+    max_item = response.get("Items")
+    if max_item:
+        return int(max_item[0]["url_number"])
     else:
+        print("empty table(no max data)")
         return None
