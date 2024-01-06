@@ -170,7 +170,8 @@ def main():
         # 3. Text to Chunks
         bucket_name = "project05-crawling"
         date_prefix = make_today_prefix()
-        prefix = f"job_data/{date_prefix}"
+        prefix = f"job-data/{date_prefix}"
+        print("PREFIX : ", prefix)
         # prefix = "job-data/2024010510"  # For test
         # prefix = "test_json"  # For test
 
