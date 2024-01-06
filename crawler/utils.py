@@ -9,16 +9,6 @@ response = ssm.get_parameter(Name=parameter_name, WithDecryption=False)
 URL_RANGE = 20  # int(response["Parameter"]["Value"])  # 3000
 
 
-def update_start_url_number(update_value: str):
-    response = ssm.put_parameter(
-        Name=parameter_name,
-        Value=update_value,
-        Type="String",
-        Overwrite=True,
-    )
-    return response
-
-
 def put_url_to_dynamo_wanted_url(base_url: str, url_number: int):
     response = dynamo_table.put_item(
         Item={"base_url": base_url, "url_number": url_number}
