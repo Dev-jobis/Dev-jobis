@@ -1,4 +1,5 @@
 import os
+import argparse
 import logging
 from time import sleep
 from datetime import datetime
@@ -15,6 +16,15 @@ logger = CustomLogger("embedding", default_level=logging.INFO)
 
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
 PINECONE_ENV = "gcp-starter"
+parser = argparse.ArgumentParser(
+    description="upsert vectors to Pinecone.",
+)
+parser.add_argument(
+    "-d",
+    "--delete_index",
+    type=bool,
+    help="if True, delete index and recreate. default False",
+)
 
 
 def define_text_splitter(
@@ -123,11 +133,12 @@ def upsert_chunks_to_index(
 
 
 def main():
+    args = parser.parse_args()
+
     # 1. Pinecone Init
     index_name = "test-metadata"
     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENV)
-
-    if pinecone.list_indexes():  # 인덱스를 하나밖에 못 만들기 때문에 기존 인덱스가 있다면 지운다. TODO: 옵션으로 수정
+    if args.delete_index:  # delete=True
         for index in pinecone.list_indexes():
             pinecone.delete_index(index)
             print("delete index Done", index)
