@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     request_body_dict = json.loads(request_body)
     if (
         request_body_dict["event"].get("bot_id")
-        and request_body_dict["event"].get("user") == "U06AHBG5DK4"
+        and request_body_dict["event"].get("user") == "U06CSU56FHA"
     ):  # bot user id
         return {
             "statusCode": 400,
