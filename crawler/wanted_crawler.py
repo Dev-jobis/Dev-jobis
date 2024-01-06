@@ -17,7 +17,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.common.exceptions import TimeoutException
 import variables
 from log_to_kafka import CustomLogger, kafka_log_producer
-from utils import START_URL_NUMBER, URL_RANGE, update_start_url_number
+import utils
 
 logger = CustomLogger(service_name="crawler", default_level=logging.INFO)
 
@@ -143,10 +143,11 @@ job_description_selector = (
 # base_selector.format(1, "span") -> 이거는 {} 안에 넣는 fstring
 
 
-def crawling_post(url):
+def crawling_post(base_url, url_number):
     """
     한 개의 url에 대해서 크롤링
     """
+    url = f"{base_url}{url_number}"
     if not check_response(url):
         return
 
@@ -205,6 +206,10 @@ def crawling_post(url):
     combined_text_json = json.dumps(combined_text, ensure_ascii=False)
     # print("combined_text_json : ", combined_text_json)
     kafka_log_producer.send("crawler-job-data", value=combined_text_json)
+
+    # certificate the job is Done.
+    utils.put_url_to_dynamo_wanted_url(base_url=base_url, url_number=url_number)
+
     logger.send_json_log(
         message="crawling complete.",
         timestamp=datetime.utcnow(),
@@ -216,21 +221,28 @@ def crawling_post(url):
 
 def main():
     start_time = time.time()
+
     wanted_post_base_url = "https://www.wanted.co.kr/wd/"
+    start_url_number = utils.get_max_url_from_dynamo_wanted_url()
+    if start_url_number is None:
+        start_url_number = 100000
     url_list = [
-        f"{wanted_post_base_url}{i}"
-        for i in range(START_URL_NUMBER, START_URL_NUMBER + URL_RANGE)
+        (wanted_post_base_url, i)
+        for i in range(start_url_number, start_url_number + utils.URL_RANGE)
     ]
 
     print("start here", url_list[0])
-    for url in url_list:
-        crawling_post(url)
+    for base_url, url_number in url_list:
+        # 이미 크롤링 한 url인지 확인한다.
+        if utils.check_url_in_dynamo_wanted_url(
+            base_url=wanted_post_base_url, url_number=url_number
+        ):
+            crawling_post(base_url, url_number)
         time.sleep(2)
-    print("end here", url)
+    print("end here", url_list[-1])
 
-    # parameter update
-    update_start_url_number(str(START_URL_NUMBER + URL_RANGE))
     end_time = time.time()
+
     logger.send_json_log(
         message=f"All crawling Done. ",
         timestamp=datetime.utcnow(),
