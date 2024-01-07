@@ -2,7 +2,7 @@
 resource "aws_security_group" "grafana" {
   name        = "kafka-cluster"
   description = "Allow port for grafana"
-  vpc_id      = aws_vpc.ansible_vpc.id
+  vpc_id      = aws_vpc.project_vpc.id
 # 그라파나 포트 허용
   ingress {
     description      = "grafana" 

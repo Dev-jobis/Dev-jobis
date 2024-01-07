@@ -1,14 +1,14 @@
 # VPC 생성
-resource "aws_vpc" "ansible_vpc" {
+resource "aws_vpc" "project_vpc" {
   cidr_block = "175.0.0.0/24"
 
   tags = {
-    Name = "terraform"
+    Name = "project"
   }
 }
 # 퍼블릭 서브넷 생성 및 설정
 resource "aws_subnet" "public_subnet1" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.0/28"
 
   availability_zone = "ap-northeast-2a"
@@ -19,7 +19,7 @@ resource "aws_subnet" "public_subnet1" {
 }
 
 resource "aws_subnet" "public_subnet2" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.16/28"
 
   availability_zone = "ap-northeast-2b"
@@ -31,7 +31,7 @@ resource "aws_subnet" "public_subnet2" {
 
 
 resource "aws_subnet" "public_subnet3" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.32/28"
 
   availability_zone = "ap-northeast-2c"
@@ -42,7 +42,7 @@ resource "aws_subnet" "public_subnet3" {
 }
 
 resource "aws_subnet" "private_subnet1" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.128/28"
 
   availability_zone = "ap-northeast-2a"
@@ -53,7 +53,7 @@ resource "aws_subnet" "private_subnet1" {
 }
 # 프라이빗 서브넷 생성 및 설정
 resource "aws_subnet" "private_subnet2" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.144/28"
 
   availability_zone = "ap-northeast-2b"
@@ -64,7 +64,7 @@ resource "aws_subnet" "private_subnet2" {
 }
 
 resource "aws_subnet" "private_subnet3" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
   cidr_block = "175.0.0.160/28"
 
   availability_zone = "ap-northeast-2c"
