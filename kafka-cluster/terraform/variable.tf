@@ -13,22 +13,22 @@ variable "role_name" {
   type = string
 }
 variable "kafka-1_ami_id" {
-  description = "id for amazon linux"
+  description = "id for kafka-cluster"
   type = string
 }
 variable "kafka-2_ami_id" {
-  description = "id for amazon linux"
+  description = "id for kafka-cluster"
   type = string
 }
 variable "kafka-3_ami_id" {
-  description = "id for amazon linux"
-  type = string
-}
-variable "grafana_ami_id" {
-  description = "id for amazon linux"
+  description = "id for kafka-cluster"
   type = string
 }
 variable "bastion_ami_id" {
-  description = "id for amazon linux"
+  description = "id for bastion host"
+  type = string
+}
+variable "grafana_ami_id" {
+  description = "id for grafana"
   type = string
 }

@@ -1,6 +1,6 @@
 # 배스천 호스트 생성
 resource "aws_instance" "bastion-host" {
-  ami = var.ec2_ami_id
+  ami = var.bastion_ami_id
   instance_type = var.ec2_instance_type
   key_name = "project0key"
   vpc_security_group_ids = [aws_security_group.bastion.id]

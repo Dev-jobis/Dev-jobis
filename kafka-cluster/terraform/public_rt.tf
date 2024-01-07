@@ -1,14 +1,14 @@
 # 인터넷 게이트웨이 생성
 resource "aws_internet_gateway" "IGW" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
 
   tags = {
-    Name = "ansible_vpc_IGW"
+    Name = "project_vpc_IGW"
   }
 }
 # 퍼블릭 서브넷 라우팅 테이블 생성
 resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.ansible_vpc.id
+  vpc_id = aws_vpc.project_vpc.id
 # 인터넷 게이트 웨이 라우팅 테이블 설정
   route {
     cidr_block = "0.0.0.0/0"

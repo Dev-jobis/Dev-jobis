@@ -1,6 +1,6 @@
 # 카프카 1번 서버 생성
 resource "aws_instance" "kafka-1" {
-  ami           = var.kafka-2_ami_id
+  ami           = var.kafka-1_ami_id
   instance_type = var.ec2_instance_type
   key_name = "project0key"
   vpc_security_group_ids = [aws_security_group.kafka-cluster.id]
@@ -8,6 +8,11 @@ resource "aws_instance" "kafka-1" {
   subnet_id = aws_subnet.private_subnet1.id
   private_ip = "175.0.0.139"
   iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name # Fluentd S3 접근 허용
+  #!/bin/bash
+      sleep 15
+      sudo systemctl restart kafka.service
+      sudo systemctl enable --now fluentd.service
+      EOF
   tags = {
   user_data = <<-EOF
 	#!/bin/bash
