@@ -1,0 +1,8 @@
+region_name       = "ap-northeast-2"
+ec2_instance_type = "m5.large"
+role_name         = "Fluentd"
+kafka-1_ami_id    = "ami-0479a79a3f9393b6d"
+kafka-2_ami_id    = "ami-0c5427fc3f9f817d9"
+kafka-3_ami_id    = "ami-0a5dd4b9334dd0444"
+grafana_ami_id    = "ami-09ae7c57568734c46"
+bastion_ami_id    = "ami-0cb530741ace35eb4"
