@@ -1,3 +1,4 @@
+#!/bin/bash
 REPOPATH=/home/ec2-user/Dev-jobis/vector_db_pinecone
 cd $REPOPATH
 echo $(pwd)
