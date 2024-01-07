@@ -24,11 +24,19 @@ variable "kafka-3_ami_id" {
   description = "id for amazon linux"
   type = string
 }
+<<<<<<< Updated upstream
 variable "grafana_ami_id" {
   description = "id for amazon linux"
   type = string
 }
 variable "bastion_ami_id" {
+=======
+variable "bastion_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
+variable "grafana_ami_id" {
+>>>>>>> Stashed changes
   description = "id for amazon linux"
   type = string
 }

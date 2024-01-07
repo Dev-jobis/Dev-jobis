@@ -1,6 +1,10 @@
 # 카프카 1번 서버 생성
 resource "aws_instance" "kafka-1" {
+<<<<<<< Updated upstream
   ami           = var.kafka-2_ami_id
+=======
+  ami           = var.kafka-1_ami_id
+>>>>>>> Stashed changes
   instance_type = var.ec2_instance_type
   key_name = "project0key"
   vpc_security_group_ids = [aws_security_group.kafka-cluster.id]
@@ -8,6 +12,11 @@ resource "aws_instance" "kafka-1" {
   subnet_id = aws_subnet.private_subnet1.id
   private_ip = "175.0.0.139"
   iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name # Fluentd S3 접근 허용
+  #!/bin/bash
+      sleep 15
+      sudo systemctl restart kafka.service
+      sudo systemctl enable --now fluentd.service
+      EOF
   tags = {
   user_data = <<-EOF
 	#!/bin/bash
@@ -28,6 +37,7 @@ resource "aws_instance" "kafka-2" {
   associate_public_ip_address = false
   subnet_id = aws_subnet.private_subnet2.id
   private_ip = "175.0.0.155"
+<<<<<<< Updated upstream
   user_data = <<-EOF
   iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name # Fluentd S3 접근 허용
 
@@ -36,6 +46,15 @@ resource "aws_instance" "kafka-2" {
         sudo systemctl restart kafka.service
   	    sudo systemctl enable --now fluentd.service
         EOF
+=======
+    iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name 
+  user_data = <<-EOF
+     #!/bin/bash
+     sleep 15
+     sudo systemctl restart kafka.service
+     sudo systemctl enable --now fluentd.service
+     EOF
+>>>>>>> Stashed changes
   tags = {
     Name = "kafka-2"
   }
@@ -49,6 +68,7 @@ resource "aws_instance" "kafka-3" {
   associate_public_ip_address = false
   subnet_id = aws_subnet.private_subnet3.id
   private_ip = "175.0.0.170"
+<<<<<<< Updated upstream
   user_data = <<-EOF
   iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name # Fluentd S3 접근 허용
 
@@ -56,6 +76,14 @@ resource "aws_instance" "kafka-3" {
         sleep 17
         sudo systemctl restart kafka.service
         EOF
+=======
+    iam_instance_profile = data.aws_iam_instance_profile.existing_role.role_name 
+  user_data = <<-EOF
+    #!/bin/bash
+    sleep 16
+    sudo systemctl restart kafka.service
+    EOF
+>>>>>>> Stashed changes
   tags = {
     Name = "kafka-3"
   }
