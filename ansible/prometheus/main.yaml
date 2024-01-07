@@ -1,6 +1,0 @@
----
-- hosts: prometheus
-  become: yes
-  gather_facts: false
-  roles:
-    - install

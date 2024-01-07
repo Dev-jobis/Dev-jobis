@@ -9,13 +9,8 @@ resource "aws_instance" "bastion-host" {
 #known_hosts 삭제
   user_data = <<-EOF
   #!/bin/bash
-  sudo dnf install python3.11 -y
-  sudo dnf install python3.11-pip -y
-  cd /usr/bin
-  ln -s /usr/bin/python3.11 python
-  python -m pip install --user ansible
+  sudo rm -rf /home/ec2-user/.ssh/known_hosts
   EOF
-
   tags = {
    Name = "bastion-host"
 }

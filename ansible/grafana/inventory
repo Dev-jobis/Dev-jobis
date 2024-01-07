@@ -1,4 +1,0 @@
-[grafana]
-175.0.0.46
-[grafana:vars]
-ansible_ssh_private_key_file= ~/project0key.pem

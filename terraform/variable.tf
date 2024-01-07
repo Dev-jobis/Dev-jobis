@@ -12,7 +12,23 @@ variable "role_name" {
   description = "role_name for fluentd and kafka-1"
   type = string
 }
-variable "ec2_ami_id" {
+variable "kafka-1_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
+variable "kafka-2_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
+variable "kafka-3_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
+variable "grafana_ami_id" {
+  description = "id for amazon linux"
+  type = string
+}
+variable "bastion_ami_id" {
   description = "id for amazon linux"
   type = string
 }
