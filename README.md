@@ -18,7 +18,7 @@
 <br>
 
 ## 자비스 아키텍처
-![전체아키텍쳐_배경흰색](https://github.com/Dev-jobis/Dev-jobis/assets/44356311/01058d94-8f56-40ae-8e78-f8fcb9cbe8f1)
+![아키텍쳐_git](https://github.com/Dev-jobis/Dev-jobis/assets/44356311/6a526c4b-1415-477a-b9a4-cba54719e9d7)
 
 ### 1. 데이터 및 로그 파이프라인
 Go to 👉 [kafka-cluster](https://github.com/Dev-jobis/Dev-jobis/tree/main/kafka-cluster) <br>
