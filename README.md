@@ -1,7 +1,12 @@
-# crawling.py 
-개발 직군 직무에 대한 질의응답이 가능한 챗봇입니다. 
-+ Wanted 홈페이지 접속 후 업무, 자격요건, 우대사항, 복지, 기술스택을 크롤링합니다.
-+ 각 txt 파일의 제목 다음 줄에 직무 분야가 나옵니다. 이 중 '개발'직군이 아닌 직무군의 경우, 크롤링해오지 않습니다.
-+ 해당 개발 직군은 Wanted 기준 개발 직군에 속하는 직무군입니다.
-+ 각 txt 파일의 맨 마지막에 채용공고별 url 번호가 있습니다 (https://www.wanted.co.kr/wd/(URL 번호))
-+ git test
+# 자비스(Job-is) !
+
+<aside>
+새싹 취준생들을 위한 개발 직무 Q&A 챗봇🌱 <br>
+언제 어디서든 자비스! 를 불러 주세요. <br>
+원티드 채용공고를 기반으로 개발 직무에 대한 궁금증을 해결해 드립니다. <br>
+</aside>
+
+* [자비스(Job-is)의 Brand Identity](https://jungpark.notion.site/Job-is-Brand-Identity-353f65ce7d9949ffac32c1edf75ae497)
+
+## 자비스 아키텍처
+
