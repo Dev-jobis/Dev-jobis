@@ -9,12 +9,27 @@
 원티드 채용공고를 기반으로 개발 직무에 대한 궁금증을 해결해 드립니다. <br>
 </aside>
 
+<br> 
+<br>
+
 * [자비스(Job-is)의 Brand Identity](https://jungpark.notion.site/Job-is-Brand-Identity-353f65ce7d9949ffac32c1edf75ae497)
 
+<br> 
+<br>
+
 ## 자비스 아키텍처
-![total_arc](https://github.com/Dev-jobis/Dev-jobis/assets/44356311/a0710b14-9260-4635-ab9f-3955f3b641e7)
+![전체아키텍쳐_배경흰색](https://github.com/Dev-jobis/Dev-jobis/assets/44356311/01058d94-8f56-40ae-8e78-f8fcb9cbe8f1)
 
 ### 1. 데이터 및 로그 파이프라인
+Go to 👉 [kafka-cluster](https://github.com/Dev-jobis/Dev-jobis/tree/main/kafka-cluster) <br>
+`Kafka` `Fluentd` `OpenSearch` `Terraform` `Ansible` `Prometheus` `Grafana`
 ### 2. 원티드 크롤러
+Go to 👉 [crawler](https://github.com/Dev-jobis/Dev-jobis/tree/main/crawler) <br>
+`Python` `Selenium` `AWS` `S3` `EC2`
 ### 3. 텍스트 임베딩과 벡터 데이터베이스
+Go to 👉 [vector_db_pinecone](https://github.com/Dev-jobis/Dev-jobis/tree/main/vector_db_pinecone) <br>
+`Python` `OpenAI` `Langchain` `Pinecone` `Docker`
+<br>
 ### 4. 자비스 본체 : Slack Bot
+Go to 👉 [chatbot-lambda](https://github.com/Dev-jobis/Dev-jobis/tree/main/chatbot-lambda) <br>
+`Python` `Slack API` `Lambda` `AWS` 
